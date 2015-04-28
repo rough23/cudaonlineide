@@ -1,0 +1,64 @@
+CUDA On-line IDE
+Copyright (c) 2015, Bc. Martin Belanec
+All rights reserved.
+m_belanec@fai.utb.cz
+
+Open Source License
+------------------------------------------------------------------------------------------
+This version of CUDA On-line IDE is licensed under the terms of the Open Source GPL 3.0 license. 
+
+http://opensource.org/licenses/gpl-3.0.html
+
+Third Party Content
+------------------------------------------------------------------------------------------
+The following third party software is distributed with CUDA On-line IDE and is 
+provided under other licenses and/or has source available from other locations. 
+
+Core (CUDA On-line IDE)
+
+Library: Google Web Toolkit
+License: Apache 2.0
+Location: http://www.gwtproject.org/
+
+Library: Maven
+License: Apache 2.0
+Location: http://maven.apache.org/
+
+Library: Apache Commons
+License: Apache 2.0
+Location: https://commons.apache.org/
+
+Library: Google Gson
+License: Apache 2.0
+Location: https://code.google.com/p/google-gson/
+
+Library: GWT Websockets
+License: GNU Lesser GPL
+Location: https://code.google.com/p/gwt-ws/
+
+Library: Apache HttpComponents
+License: Apache 2.0
+Location: https://hc.apache.org/index.html
+
+Library: SLF4J
+License: MIT license
+Location: http://www.slf4j.org/
+
+Library: ZIP4J
+License: Apache 2.0
+Location: http://www.lingala.net/zip4j/
+
+Library: ZT-ZIP
+License: Apache 2.0
+Location: https://github.com/zeroturnaround/zt-zip
+
+--
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
