@@ -6,6 +6,10 @@
 
 # gwt caches and compiled units #
 war/cudaonlineide/
+gwt-unitCache/
+.gwt/
+.settings/
+test-classes/
 
 # more caches and things from deploy #
 war/WEB-INF/deploy/
