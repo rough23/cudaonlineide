@@ -1,0 +1,15 @@
+cz.utb.fai.cudaonlineide.client
+cz.utb.fai.cudaonlineide.client.context
+cz.utb.fai.cudaonlineide.client.dto
+cz.utb.fai.cudaonlineide.client.popup
+cz.utb.fai.cudaonlineide.client.service.coi
+cz.utb.fai.cudaonlineide.client.service.login
+cz.utb.fai.cudaonlineide.client.utils
+cz.utb.fai.cudaonlineide.server.service.coi
+cz.utb.fai.cudaonlineide.server.service.download
+cz.utb.fai.cudaonlineide.server.service.login
+cz.utb.fai.cudaonlineide.server.service.upload
+cz.utb.fai.cudaonlineide.server.verifier
+cz.utb.fai.cudaonlineide.shared.constants
+cz.utb.fai.cudaonlineide.shared.dto
+cz.utb.fai.cudaonlineide.shared.dto.project

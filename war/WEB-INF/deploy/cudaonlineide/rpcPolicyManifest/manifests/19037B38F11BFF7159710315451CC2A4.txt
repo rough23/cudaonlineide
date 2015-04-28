@@ -1,0 +1,2 @@
+serviceClass: cz.utb.fai.cudaonlineide.client.service.login.LoginService
+path: FB6581EA2784A3A28027CD59EE375578.gwt.rpc

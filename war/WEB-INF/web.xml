@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+
+  <!-- Servlets -->
+  <servlet>
+    <servlet-name>coiServlet</servlet-name>
+    <servlet-class>cz.utb.fai.cudaonlineide.server.service.coi.COIServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>loginService</servlet-name>
+    <servlet-class>cz.utb.fai.cudaonlineide.server.service.login.LoginServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>downloadFileService</servlet-name>
+    <servlet-class>cz.utb.fai.cudaonlineide.server.service.download.DownloadFileService</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>downloadZipService</servlet-name>
+    <servlet-class>cz.utb.fai.cudaonlineide.server.service.download.DownloadZipService</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>uploadFileService</servlet-name>
+    <servlet-class>cz.utb.fai.cudaonlineide.server.service.upload.UploadFileService</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>uploadZipService</servlet-name>
+    <servlet-class>cz.utb.fai.cudaonlineide.server.service.upload.UploadZipService</servlet-class>
+  </servlet>
+  
+  <!-- Servlets mapping -->
+  <servlet-mapping>
+    <servlet-name>coiServlet</servlet-name>
+    <url-pattern>/cudaonlineide/coi</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>loginService</servlet-name>
+    <url-pattern>/cudaonlineide/loginService</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>downloadFileService</servlet-name>
+    <url-pattern>/cudaonlineide/downloadFileService</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>downloadZipService</servlet-name>
+    <url-pattern>/cudaonlineide/downloadZipService</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>uploadFileService</servlet-name>
+    <url-pattern>/cudaonlineide/uploadFileService</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>uploadZipService</servlet-name>
+    <url-pattern>/cudaonlineide/uploadZipService</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>CudaOnlineIDE.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>
