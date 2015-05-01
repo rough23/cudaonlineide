@@ -50,10 +50,12 @@ import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.button.ButtonGroup;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
@@ -64,6 +66,8 @@ import com.sencha.gxt.widget.core.client.container.Viewport;
 import com.sencha.gxt.widget.core.client.event.BeforeShowContextMenuEvent;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.event.CloseEvent.CloseHandler;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.BeforeShowContextMenuEvent.BeforeShowContextMenuHandler;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
@@ -290,8 +294,10 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	  aceConnectionCatalina.setSize(COIConstants.SIZE_100_PERCENTAGE, COIConstants.SIZE_100_PERCENTAGE);
 	  
 	  CudaOnlineIDE.consoleTabPanel.add(CudaOnlineIDE.aceConsole, new TabItemConfig(COIConstants.PANEL_CONSOLE, false));
-	  CudaOnlineIDE.consoleTabPanel.add(CudaOnlineIDE.aceConnectionLocalhost, new TabItemConfig(COIConstants.PANEL_CONNECTION_LOGS, false));
-	  CudaOnlineIDE.consoleTabPanel.add(CudaOnlineIDE.aceConnectionCatalina, new TabItemConfig(COIConstants.PANEL_SERVER_LOGS, false));
+	  
+	  // DEVELOPMENT TOOL
+//	  CudaOnlineIDE.consoleTabPanel.add(CudaOnlineIDE.aceConnectionLocalhost, new TabItemConfig(COIConstants.PANEL_CONNECTION_LOGS, false));
+//	  CudaOnlineIDE.consoleTabPanel.add(CudaOnlineIDE.aceConnectionCatalina, new TabItemConfig(COIConstants.PANEL_SERVER_LOGS, false));
 	  
 	  CudaOnlineIDE.aceConsole.startEditor();
 	  CudaOnlineIDE.aceConsole.setMode(AceEditorMode.PLAIN_TEXT);
@@ -526,13 +532,31 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	        	  CudaOnlineIDE.this.logoutUser();				  
 			  } 
 	          else if(item.getText().equals(COIConstants.MENU_PROPERTIES)) {
-	        	  CudaOnlineIDE.this.openProjectPropertiesMenuToolbar();
+	        	  
+	        	  if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+	      	  		  Info.display("Properties error", "No active project.");
+	      	  		  return;
+	      	  	  }
+	        	  
+	        	  CudaOnlineIDE.openProjectPropertiesMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);
 			  } 
 	          else if(item.getText().equals(COIConstants.MENU_BUILD)) {
-	        	  CudaOnlineIDE.this.buildProjectMenuToolbar();				  
+	        	  
+	        	  if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+  		  		  	  Info.display("Build error", "No active project.");
+  		  		  	  return;
+	  		  	  }
+	      		
+	        	  CudaOnlineIDE.buildProjectMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);				  
 			  } 
 	          else if(item.getText().equals(COIConstants.MENU_RUN)) {
-	        	  CudaOnlineIDE.this.runProjectMenuToolbar();				  
+	        	  
+	        	  if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+	      	  		  Info.display("Run error", "No active project.");
+	      	  		  return;
+	      	  	  }
+	        	  
+	        	  CudaOnlineIDE.runProjectMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);				  
 			  }
 	          else if(item.getText().equals(COIConstants.MENU_SOFT_TABS)) {
 	        	  CudaOnlineIDE.this.editorSoftTabsMenuToolbar(item);				  
@@ -563,6 +587,9 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 			  } 
 	          else if(item.getText().equals(COIConstants.MENU_HELP)) {
 	        	  CudaOnlineIDE.this.helpMenuToolbar();
+	          }
+	          else if(item.getText().equals(COIConstants.MENU_CUDA_PROGRAMMING_GUIDE)) {
+	        	  CudaOnlineIDE.this.programmingGuideMenuToolbar();
 	          }
 	          else if(item.getText().equals(COIConstants.MENU_ABOUT)) {
 	        	  CudaOnlineIDE.this.aboutMenuToolbar();
@@ -627,9 +654,19 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	  
 	  // BUILDING PROJECT MENU
 	  MenuItem projectItem1 = new MenuItem(COIConstants.MENU_SET_ACTIVE_PROJECT, MenuToolbarIcons.PROVIDER.projectActive());
-	  MenuItem projectItem2 = new MenuItem(COIConstants.MENU_CMAKE, MenuToolbarIcons.PROVIDER.menuCmake());
-	  MenuItem projectItem3 = new MenuItem(COIConstants.MENU_PROPERTIES, MenuToolbarIcons.PROVIDER.menuProperties());
+	  MenuItem projectItem2 = new MenuItem(COIConstants.MENU_PROPERTIES, MenuToolbarIcons.PROVIDER.menuProperties());
 	 
+	  Menu projectMenu = new Menu();
+	  projectMenu.addSelectionHandler(handler);
+	  projectMenu.add(projectItem1);
+	  projectMenu.add(new SeparatorMenuItem());
+	  projectMenu.add(projectItem2);
+	  
+	  // BUILDING BUILD MENU
+	  MenuItem buildItem0 = new MenuItem(COIConstants.MENU_CMAKE, MenuToolbarIcons.PROVIDER.menuCmake());
+	  MenuItem buildItem1 = new MenuItem(COIConstants.MENU_BUILD, MenuToolbarIcons.PROVIDER.menuBuild());
+	  MenuItem buildItem2 = new MenuItem(COIConstants.MENU_RUN, MenuToolbarIcons.PROVIDER.menuRun());
+	  
 	  Menu cmakeSubMenu = new Menu();
 	  MenuItem generateCMakeListsItem = new MenuItem(COIConstants.MENU_GENERATE_CMAKELISTS);
 	  
@@ -657,7 +694,13 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 		     */
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				CudaOnlineIDE.this.createMakefileMenuToolbar();
+				
+				if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+			  		Info.display("Makefile error", "No active project.");
+			  		return;
+			  	}
+				
+				CudaOnlineIDE.createMakefileMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);
 			}
 		  });
 	  
@@ -673,7 +716,13 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 		 */
 		@Override
 		public void onSelection(SelectionEvent<Item> event) {
-			CudaOnlineIDE.this.generateCMakeListsMenuToolbar(COIConstants.MENU_EXECUTABLE);
+			
+			if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+    			Info.display("CMake error", "No active project.");
+    			return;
+	  	  	}
+			
+			CudaOnlineIDE.generateCMakeListsMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, COIConstants.MENU_EXECUTABLE);
 		}
 	  });
 	  
@@ -687,7 +736,13 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 		 */
 		@Override
 		public void onSelection(SelectionEvent<Item> event) {
-			CudaOnlineIDE.this.generateCMakeListsMenuToolbar(COIConstants.MENU_STATIC_LIB);
+
+			if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+    			Info.display("CMake error", "No active project.");
+    			return;
+	  	  	}
+			
+			CudaOnlineIDE.generateCMakeListsMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, COIConstants.MENU_STATIC_LIB);
 		}
 	  });
 	  MenuItem generateShared = new MenuItem(COIConstants.MENU_SHARED_LIB);
@@ -700,35 +755,28 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 		 */
 		@Override
 		public void onSelection(SelectionEvent<Item> event) {
-			CudaOnlineIDE.this.generateCMakeListsMenuToolbar(COIConstants.MENU_SHARED_LIB);
+
+			if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+    			Info.display("CMake error", "No active project.");
+    			return;
+	  	  	}
+			
+			CudaOnlineIDE.generateCMakeListsMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, COIConstants.MENU_SHARED_LIB);
 		}
 	  });
 	  
 	  generateCMakeListsSubMenu.add(generateExecutable);
-	  generateCMakeListsSubMenu.add(generateStatic);
-	  generateCMakeListsSubMenu.add(generateShared);
 	  
 	  generateCMakeListsItem.setSubMenu(generateCMakeListsSubMenu);
 	  
 	  cmakeSubMenu.add(generateCMakeListsItem);
 	  cmakeSubMenu.add(openCMakeListsItem);
-	  cmakeSubMenu.add(createMakefileItem);
 	 
-	  projectItem2.setSubMenu(cmakeSubMenu);
-	  
-	  Menu projectMenu = new Menu();
-	  projectMenu.addSelectionHandler(handler);
-	  projectMenu.add(projectItem1);
-	  projectMenu.add(projectItem2);
-	  projectMenu.add(new SeparatorMenuItem());
-	  projectMenu.add(projectItem3);
-	  
-	  // BUILDING BUILD MENU
-	  MenuItem buildItem1 = new MenuItem(COIConstants.MENU_BUILD, MenuToolbarIcons.PROVIDER.menuBuild());
-	  MenuItem buildItem2 = new MenuItem(COIConstants.MENU_RUN, MenuToolbarIcons.PROVIDER.menuRun());
+	  buildItem0.setSubMenu(cmakeSubMenu);
 	  
 	  Menu buildMenu = new Menu();
 	  buildMenu.addSelectionHandler(handler);
+	  buildMenu.add(buildItem0);
 	  buildMenu.add(buildItem1);
 	  buildMenu.add(buildItem2);
 	  
@@ -740,13 +788,14 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	  userMenu.add(userItem1);
 	  
 	  // BUILDING LOG MENU
-	  MenuItem logItem1 = new MenuItem(COIConstants.MENU_CONNECTION_LOGS, MenuToolbarIcons.PROVIDER.menuConnection());
-	  MenuItem logItem2 = new MenuItem(COIConstants.MENU_SERVER_LOGS, MenuToolbarIcons.PROVIDER.menuServer());
-	  
-	  Menu logMenu = new Menu();
-	  logMenu.addSelectionHandler(handler);
-	  logMenu.add(logItem1);
-	  logMenu.add(logItem2);
+	  // DEVELOPMENT TOOL
+//	  MenuItem logItem1 = new MenuItem(COIConstants.MENU_CONNECTION_LOGS, MenuToolbarIcons.PROVIDER.menuConnection());
+//	  MenuItem logItem2 = new MenuItem(COIConstants.MENU_SERVER_LOGS, MenuToolbarIcons.PROVIDER.menuServer());
+//	  
+//	  Menu logMenu = new Menu();
+//	  logMenu.addSelectionHandler(handler);
+//	  logMenu.add(logItem1);
+//	  logMenu.add(logItem2);
 	  
 	  // BUILDING WINDOW MENU
 	  CheckMenuItem windowItem1 = new CheckMenuItem(COIConstants.PANEL_PROJECT_EXPLORER);
@@ -764,13 +813,15 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	  
 	  // BUILDING HELP MENU
 	  MenuItem helpItem1 = new MenuItem(COIConstants.MENU_HELP);
-	  MenuItem helpItem2 = new MenuItem(COIConstants.MENU_ABOUT, MenuToolbarIcons.PROVIDER.menuAbout());
+	  MenuItem helpItem2 = new MenuItem(COIConstants.MENU_CUDA_PROGRAMMING_GUIDE);
+	  MenuItem helpItem3 = new MenuItem(COIConstants.MENU_ABOUT, MenuToolbarIcons.PROVIDER.menuAbout());
 	  
 	  Menu helpMenu = new Menu();
 	  helpMenu.addSelectionHandler(handler);
 	  helpMenu.add(helpItem1);
-	  helpMenu.add(new SeparatorMenuItem());
 	  helpMenu.add(helpItem2);
+	  helpMenu.add(new SeparatorMenuItem());
+	  helpMenu.add(helpItem3);
 	  
 	  // BUILDING MENUBAR
 	  MenuBar bar = new MenuBar();
@@ -780,7 +831,8 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_PROJECT, projectMenu));
 	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_BUILD, buildMenu));
 	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_USER, userMenu));
-	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_LOG, logMenu));
+	  // DEVELOPMENT TOOL
+//	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_LOG, logMenu));
 	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_EDITOR, editorMenu));
 	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_WINDOW, windowMenu));
 	  bar.add(new MenuBarItem(COIConstants.MENUTOOLBAR_HELP, helpMenu));
@@ -884,32 +936,6 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
       
       // PROJECT TOOLBAR GROUP
       
-      TextButton projectCmakeLists = new TextButton();
-      projectCmakeLists.setIcon(MenuToolbarIcons.PROVIDER.menuCmakeLists());
-      projectCmakeLists.setToolTip(COIConstants.MENU_GENERATE_CMAKELISTS + " as executable");
-      projectCmakeLists.addSelectHandler(new SelectHandler() {
-  		
-    	/**
-    	 * ToolBar generate CMakeLists.txt as executable handler.    
-    	 */
-    	@Override
-  		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.generateCMakeListsMenuToolbar(COIConstants.MENU_EXECUTABLE);	
-  		}
-  	  });
-      TextButton projectCmake = new TextButton();
-      projectCmake.setIcon(MenuToolbarIcons.PROVIDER.menuCmake());
-      projectCmake.setToolTip(COIConstants.MENU_CREATE_MAKEFILE);
-      projectCmake.addSelectHandler(new SelectHandler() {
-  		
-    	/**
-    	 * ToolBar create makefile handler.    
-    	 */
-    	@Override
-  		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.createMakefileMenuToolbar();	
-  		}
-  	  });
       TextButton projectProperties = new TextButton();
       projectProperties.setIcon(MenuToolbarIcons.PROVIDER.menuProperties());
       projectProperties.setToolTip(COIConstants.MENU_PROPERTIES);
@@ -920,7 +946,13 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
     	 */
     	@Override
   		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.openProjectPropertiesMenuToolbar();		
+    		
+    		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+    	  		Info.display("Properties error", "No active project.");
+    	  		return;
+    	  	}
+    		
+  			CudaOnlineIDE.openProjectPropertiesMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);		
   		}
   	  });
       TextButton activeProjectName = new TextButton();
@@ -938,10 +970,8 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
   	  });
       
       FlexTable tableProject = new FlexTable();
-      tableProject.setWidget(0, 0, projectCmakeLists);
-      tableProject.setWidget(0, 1, projectCmake);
-      tableProject.setWidget(0, 2, projectProperties);
-      tableProject.setWidget(0, 3, activeProjectName);
+      tableProject.setWidget(0, 1, projectProperties);
+      tableProject.setWidget(0, 2, activeProjectName);
       ButtonGroup projectGroup = new ButtonGroup();
       projectGroup.setHeadingText(COIConstants.MENUTOOLBAR_PROJECT);
       projectGroup.add(tableProject);
@@ -983,7 +1013,25 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
       fileGroup.add(tableFile);
       
       // BUILD TOOLBAR GROUP
-      
+      TextButton buildCmakeLists = new TextButton();
+      buildCmakeLists.setIcon(MenuToolbarIcons.PROVIDER.menuCmakeLists());
+      buildCmakeLists.setToolTip(COIConstants.MENU_GENERATE_CMAKELISTS + " as executable");
+      buildCmakeLists.addSelectHandler(new SelectHandler() {
+  		
+    	/**
+    	 * ToolBar generate CMakeLists.txt as executable handler.    
+    	 */
+    	@Override
+  		public void onSelect(SelectEvent event) {
+    		
+    		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+    			Info.display("CMake error", "No active project.");
+    			return;
+	  	  	}
+    		
+  			CudaOnlineIDE.generateCMakeListsMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, COIConstants.MENU_EXECUTABLE);	
+  		}
+  	  });
       TextButton buildBuild = new TextButton();
       buildBuild.setIcon(MenuToolbarIcons.PROVIDER.menuBuild());
       buildBuild.setToolTip(COIConstants.MENU_BUILD);
@@ -994,7 +1042,13 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
     	 */
     	@Override
   		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.buildProjectMenuToolbar();	
+    		
+	    	if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+		  		Info.display("Build error", "No active project.");
+		  		return;
+		  	}
+    		
+  			CudaOnlineIDE.buildProjectMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);	
   		}
   	  });
       TextButton buildRun = new TextButton();
@@ -1007,13 +1061,20 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
     	 */
     	@Override
   		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.runProjectMenuToolbar();
+    		
+    		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
+    	  		Info.display("Run error", "No active project.");
+    	  		return;
+    	  	}
+    		
+  			CudaOnlineIDE.runProjectMenuToolbar(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);
   		}
   	  });
       
       FlexTable tableBuild = new FlexTable();
-      tableBuild.setWidget(0, 0, buildBuild);
-      tableBuild.setWidget(0, 1, buildRun);
+      tableBuild.setWidget(0, 0, buildCmakeLists);
+      tableBuild.setWidget(0, 1, buildBuild);
+      tableBuild.setWidget(0, 2, buildRun);
       ButtonGroup buildGroup = new ButtonGroup();
       buildGroup.setHeadingText(COIConstants.MENUTOOLBAR_BUILD);
       buildGroup.add(tableBuild);
@@ -1041,40 +1102,41 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
       userGroup.add(tableUser);
       
       // LOG TOOLBAR GROUP
+      // DEVELOPMENT TOOL
       
-      TextButton logConnection = new TextButton();
-      logConnection.setIcon(MenuToolbarIcons.PROVIDER.menuConnection());
-      logConnection.setToolTip(COIConstants.MENU_CONNECTION_LOGS);
-      logConnection.addSelectHandler(new SelectHandler() {
-  		
-    	/**
-    	 * ToolBar logs of connection handler.   
-    	 */
-    	@Override
-  		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.connectToLocalhostLogFileMenuToolbar();
-  		}
-  	  });
-      TextButton logServer = new TextButton();
-      logServer.setIcon(MenuToolbarIcons.PROVIDER.menuServer());
-      logServer.setToolTip(COIConstants.MENU_SERVER_LOGS);
-      logServer.addSelectHandler(new SelectHandler() {
-  		
-    	/**
-    	 * ToolBar logs of server handler.   
-    	 */
-    	@Override
-  		public void onSelect(SelectEvent event) {
-  			CudaOnlineIDE.this.connectToCatalinaLogFileMenuToolbar();
-  		}
-  	  });
-      
-      FlexTable tableLog = new FlexTable();
-      tableLog.setWidget(0, 0, logConnection);
-      tableLog.setWidget(0, 1, logServer);
-      ButtonGroup logGroup = new ButtonGroup();
-      logGroup.setHeadingText(COIConstants.MENUTOOLBAR_LOG);
-      logGroup.add(tableLog);
+//      TextButton logConnection = new TextButton();
+//      logConnection.setIcon(MenuToolbarIcons.PROVIDER.menuConnection());
+//      logConnection.setToolTip(COIConstants.MENU_CONNECTION_LOGS);
+//      logConnection.addSelectHandler(new SelectHandler() {
+//  		
+//    	/**
+//    	 * ToolBar logs of connection handler.   
+//    	 */
+//    	@Override
+//  		public void onSelect(SelectEvent event) {
+//  			CudaOnlineIDE.this.connectToLocalhostLogFileMenuToolbar();
+//  		}
+//  	  });
+//      TextButton logServer = new TextButton();
+//      logServer.setIcon(MenuToolbarIcons.PROVIDER.menuServer());
+//      logServer.setToolTip(COIConstants.MENU_SERVER_LOGS);
+//      logServer.addSelectHandler(new SelectHandler() {
+//  		
+//    	/**
+//    	 * ToolBar logs of server handler.   
+//    	 */
+//    	@Override
+//  		public void onSelect(SelectEvent event) {
+//  			CudaOnlineIDE.this.connectToCatalinaLogFileMenuToolbar();
+//  		}
+//  	  });
+//      
+//      FlexTable tableLog = new FlexTable();
+//      tableLog.setWidget(0, 0, logConnection);
+//      tableLog.setWidget(0, 1, logServer);
+//      ButtonGroup logGroup = new ButtonGroup();
+//      logGroup.setHeadingText(COIConstants.MENUTOOLBAR_LOG);
+//      logGroup.add(tableLog);
       
       // CONFIGURATION TOOLBAR GROUP
       
@@ -1199,7 +1261,8 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
       toolBar.add(buildGroup);
       toolBar.add(configurationGroup);
       toolBar.add(userGroup);
-      toolBar.add(logGroup);
+      // DEVELOPMENT TOOL
+//      toolBar.add(logGroup);
       toolBar.add(editorGroup);
       
       // ------------ SETS CONTENT OF NORTH LAYOUT PANEL ------------
@@ -1758,7 +1821,6 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 			MenuItem projectMenuProperties = TreeContextMenu.getPropertiesContextMenu(CudaOnlineIDE.coiDataTreeStore, CudaOnlineIDE.coiDataTree);
 			MenuItem projectMenuSetAsActive = TreeContextMenu.getSetAsActiveContextMenu(CudaOnlineIDE.coiDataTreeStore, CudaOnlineIDE.coiDataTree);
 			MenuItem projectMenuGenerateCMakeLists = TreeContextMenu.getGenerateCMakeListsContextMenu(CudaOnlineIDE.coiDataTreeStore, CudaOnlineIDE.coiDataTree);
-			MenuItem projectMenuCreateMakefile = TreeContextMenu.getCreateMakefileContextMenu(CudaOnlineIDE.coiDataTreeStore, CudaOnlineIDE.coiDataTree);
 			MenuItem projectMenuBuild = TreeContextMenu.getBuildContextMenu(CudaOnlineIDE.coiDataTreeStore, CudaOnlineIDE.coiDataTree);
 			MenuItem projectMenuRun = TreeContextMenu.getRunContextMenu(CudaOnlineIDE.coiDataTreeStore, CudaOnlineIDE.coiDataTree);
 			
@@ -1801,7 +1863,6 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 							contextMenu.add(projectMenuProperties);
 							contextMenu.add(projectMenuSetAsActive);
 							contextMenu.add(projectMenuGenerateCMakeLists);
-							contextMenu.add(projectMenuCreateMakefile);
 							contextMenu.add(projectMenuBuild);
 							contextMenu.add(projectMenuRun);
 							break;
@@ -2238,6 +2299,8 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 			  	  	CudaOnlineIDE.eastPanel.add(CudaOnlineIDE.fileDataTreeActionProvider(fdp));
 			  	  
 			  	  	CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
+			  	  	
+			  	  	// DEVELOPMENT TOOL
 			  	  	CudaOnlineIDE.aceConnectionCatalina.setValue(COIConstants.EMPTY);
 			  	  	CudaOnlineIDE.aceConnectionLocalhost.setValue(COIConstants.EMPTY);
 			  	  	
@@ -2274,6 +2337,8 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
   	  	CudaOnlineIDE.eastPanel.add(CudaOnlineIDE.fileDataTreeActionProvider(fdp));
   	  
   	  	CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
+  	  	
+  	  	// DEVELOPMENT TOOL
   	  	CudaOnlineIDE.aceConnectionCatalina.setValue(COIConstants.EMPTY);
   	  	CudaOnlineIDE.aceConnectionLocalhost.setValue(COIConstants.EMPTY);
   	  	
@@ -2501,14 +2566,9 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	/**
 	 * Method creates makefile for active project.
 	 */
-	private void createMakefileMenuToolbar() {
+	public static void createMakefileMenuToolbar(final COIProject coiProject) {
 		
-		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
-	  		Info.display("Makefile error", "No active project.");
-	  		return;
-	  	}
-	  
-		CudaOnlineIDE.aceConsole.setValue("----- CREATING MAKEFILE -----");
+		CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
 		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
 		
 		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Crate", "Creating makefile, please wait...");
@@ -2516,7 +2576,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	    messageBox.auto();
 	    messageBox.show();
 		
-	  	CudaOnlineIDE.coiService.createMakefile(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, new AsyncCallback<String>() {
+	  	CudaOnlineIDE.coiService.createMakefile(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, coiProject, new AsyncCallback<String>() {
 	  		
 	  		/**
 	  		 * Method is called if creating makefile failed.
@@ -2547,47 +2607,73 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	/**
 	 * Method generate CMakeLists.txt for active project.
 	 */
-	private void generateCMakeListsMenuToolbar(String typeOfGenerate) {
-				
-		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
-	  		Info.display("Cmake error", "No active project.");
-	  		return;
-	  	}
+	public static void generateCMakeListsMenuToolbar(final COIProject coiProject, final String typeOfGenerate) {
 	  
-		CudaOnlineIDE.aceConsole.setValue("----- GENERATING CMAKELISTS -----");
-		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
-		
-		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Generate", "Generating CMakeLists.txt, please wait...");
-	    messageBox.setProgressText("Generating...");
-	    messageBox.auto();
-	    messageBox.show();
-		
-		CudaOnlineIDE.coiService.generateCMakeLists(typeOfGenerate, CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, new AsyncCallback<String>() {
-	      	
-			/**
-			 * Method is called if generating of CMakeLists.txt failed.
-			 */
+		final DialogHideHandler hideHandler = new DialogHideHandler() {
+		    
+			@Override
+		    public void onDialogHide(DialogHideEvent event) {
+		    	if(event.getHideButton().compareTo(PredefinedButton.YES) == 0) {
+		    		
+		    		CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
+		    		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    		
+		    		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Generate", "Generating CMakeLists.txt, please wait...");
+		    	    messageBox.setProgressText("Generating...");
+		    	    messageBox.auto();
+		    	    messageBox.show();	
+		    		
+		    		CudaOnlineIDE.coiService.generateCMakeLists(typeOfGenerate, coiProject, new AsyncCallback<String>() {
+		    	      	
+		    			/**
+		    			 * Method is called if generating of CMakeLists.txt failed.
+		    			 */
+		    			@Override
+		    			public void onFailure(Throwable caught) {
+		    				messageBox.hide();
+		    				GWT.log(caught.getMessage());
+		    				Info.display("CMake error", "Error in creating CMakeLists.");
+		    			}
+
+		    			/**
+		    			 * Method is called if generating of CMakeLists.txt is successful.
+		    			 * 
+		    			 * @param result Generating progress.
+		    			 */
+		    			@Override
+		    			public void onSuccess(String result) {
+		    				messageBox.hide();
+		    				CudaOnlineIDE.aceConsole.setValue(result);
+		    				CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    				
+		    				Info.display("CMake", "CMakeLists generating.");
+		    			}
+		    		});	
+		    	}
+		    }
+	    };
+	    
+	    CudaOnlineIDE.coiService.prebuildGenerating(coiProject, new AsyncCallback<Integer>() {
+
 			@Override
 			public void onFailure(Throwable caught) {
-				messageBox.hide();
 				GWT.log(caught.getMessage());
-				Info.display("CMake error", "Error in creating CMakeLists.");
+				Info.display("CMake error", "Error in testing CMakeLists files.");				
 			}
 
-			/**
-			 * Method is called if generating of CMakeLists.txt is successful.
-			 * 
-			 * @param result Generating progress.
-			 */
 			@Override
-			public void onSuccess(String result) {
-				messageBox.hide();
-				CudaOnlineIDE.aceConsole.setValue(result);
-				CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
-				
-				Info.display("CMake", "CMakeLists generating.");
+			public void onSuccess(Integer result) {
+
+				if(result == COIConstants.GENERATING_WITH_QUESTION) {
+					ConfirmMessageBox confirmnBox = new ConfirmMessageBox("Generate CMakeLists.txt", "Are you sure you want to create new CMakeLists.txt and delete your changes?");
+					confirmnBox.addDialogHideHandler(hideHandler);
+					confirmnBox.show();
+				} else {
+					hideHandler.onDialogHide(new DialogHideEvent(PredefinedButton.YES));
+				}
 			}
-		});			
+	    	
+	    });
 	}
 	
 	/**
@@ -2633,82 +2719,255 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	/**
 	 * Method builds active project.
 	 */
-	private void buildProjectMenuToolbar() {
-		
-		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
-	  		Info.display("Build error", "No active project.");
-	  		return;
-	  	}
+	public static void buildProjectMenuToolbar(final COIProject coiProject) {
 	  
-		CudaOnlineIDE.aceConsole.setValue("----- BUILDING -----");
-		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
-		
-		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Build", "Building project, please wait...");
-	    messageBox.setProgressText("Building...");
-	    messageBox.auto();
-	    messageBox.show();
-		
-	  	CudaOnlineIDE.coiService.buildProject(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, new AsyncCallback<String[]>() {
-        	
-	  		/**
-	  		 * Method is called if building of project failed.
-	  		 */
+		final DialogHideHandler hideHandler = new DialogHideHandler() {
+		    
+			@Override
+		    public void onDialogHide(DialogHideEvent event) {
+		    	if(event.getHideButton().compareTo(PredefinedButton.YES) == 0) {
+		    		
+		    		CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
+		    		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    		
+		    		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Generate", "Generating CMakeLists.txt, please wait...");
+		    	    messageBox.setProgressText("Generating...");
+		    	    messageBox.auto();
+		    	    messageBox.show();	
+		    		
+		    		CudaOnlineIDE.coiService.generateCMakeLists(COIConstants.MENU_EXECUTABLE, coiProject, new AsyncCallback<String>() {
+		    	      	
+		    			/**
+		    			 * Method is called if generating of CMakeLists.txt failed.
+		    			 */
+		    			@Override
+		    			public void onFailure(Throwable caught) {
+		    				messageBox.hide();
+		    				GWT.log(caught.getMessage());
+		    				Info.display("Build error", "Error in creating CMakeLists.");
+		    			}
+
+		    			/**
+		    			 * Method is called if generating of CMakeLists.txt is successful.
+		    			 * 
+		    			 * @param result Generating progress.
+		    			 */
+		    			@Override
+		    			public void onSuccess(String result) {
+		    				messageBox.hide();
+		    				CudaOnlineIDE.aceConsole.setValue(result);
+		    				CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    				Info.display("Build", "CMakeLists generating.");
+		    				
+		    				final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Create", "Creating makefile, please wait...");
+		    			    messageBox.setProgressText("Creating...");
+		    			    messageBox.auto();
+		    			    messageBox.show();
+		    				
+		    			  	CudaOnlineIDE.coiService.createMakefile(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, coiProject, new AsyncCallback<String>() {
+		    			  		
+		    			  		/**
+		    			  		 * Method is called if creating makefile failed.
+		    			  		 */
+		    					@Override
+		    					public void onFailure(Throwable caught) {
+		    						messageBox.hide();
+		    						GWT.log(caught.getMessage());
+		    		      		Info.display("Build error", "Error in creating Makefile.");
+		    		      	}
+		    					
+		    					/**
+		    					 * Method is called if creating makefile is successful.
+		    					 * 
+		    					 * @param result Making progress.
+		    					 */
+		    					@Override
+		    					public void onSuccess(String result) {
+		    						messageBox.hide();
+		    						CudaOnlineIDE.aceConsole.setValue(CudaOnlineIDE.aceConsole.getValue() + COIConstants.LINE_SEPARATOR + result);
+		    						CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    						Info.display("Build", "Makefile creating.");
+		    						
+		    						final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Build", "Building project, please wait...");
+		    					    messageBox.setProgressText("Building...");
+		    					    messageBox.auto();
+		    					    messageBox.show();
+		    						
+		    					  	CudaOnlineIDE.coiService.buildProject(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, coiProject, new AsyncCallback<String[]>() {
+		    				        	
+		    					  		/**
+		    					  		 * Method is called if building of project failed.
+		    					  		 */
+		    							@Override
+		    							public void onFailure(Throwable caught) {
+		    								GWT.log(caught.getMessage());
+		    								messageBox.hide();
+		    				        		Info.display("Build error", "Error in building project.");
+		    				        	}
+
+		    							/**
+		    							 * Method is called if building of project is successful.
+		    							 * 
+		    							 * @param result Build progress.
+		    							 */
+		    							@Override
+		    							public void onSuccess(String[] result) {
+		    								
+		    								messageBox.hide();
+		    								
+		    								if(result == null || result.length == 0) {
+		    									CudaOnlineIDE.aceConsole.setValue("ERROR: Unexpected problem.");
+		    									CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    									return;
+		    								}
+		    								
+		    								if(result.length == 1) {
+		    									CudaOnlineIDE.aceConsole.setValue(result[0]);
+		    									CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    									return;
+		    								}
+
+		    								coiProject.setUuid(result[0]);
+		    								
+		    								for(COIProject coiProjectTmp : CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE.getItems()) {
+		    									if(coiProject.getPath().equals(coiProjectTmp.getPath())) {
+		    										coiProjectTmp.setUuid(result[0]);
+		    										coiProjectTmp.setBuildedOnce(true);
+		    									}
+		    								}
+		    								
+		    								CudaOnlineIDE.aceConsole.setValue(CudaOnlineIDE.aceConsole.getValue() + COIConstants.LINE_SEPARATOR + result[1]);
+		    								CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    								
+		    								Info.display("Build", "Project building.");
+		    							}
+		    						});
+		    					}
+		    				});
+		    			}
+		    		});	
+		    	} else {
+		    		
+		    		CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
+		    		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    		
+		    		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Create", "Creating makefile, please wait...");
+		    	    messageBox.setProgressText("Creating...");
+		    	    messageBox.auto();
+		    	    messageBox.show();
+		    		
+		    	  	CudaOnlineIDE.coiService.createMakefile(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, coiProject, new AsyncCallback<String>() {
+		    	  		
+		    	  		/**
+		    	  		 * Method is called if creating makefile failed.
+		    	  		 */
+		    			@Override
+		    			public void onFailure(Throwable caught) {
+		    				messageBox.hide();
+		    				GWT.log(caught.getMessage());
+		          		Info.display("Build error", "Error in creating Makefile.");
+		          	}
+		    			
+		    			/**
+		    			 * Method is called if creating makefile is successful.
+		    			 * 
+		    			 * @param result Making progress.
+		    			 */
+		    			@Override
+		    			public void onSuccess(String result) {
+		    				messageBox.hide();
+		    				CudaOnlineIDE.aceConsole.setValue(result);
+		    				CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    				Info.display("Build", "Makefile creating.");
+		    				
+		    				final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Build", "Building project, please wait...");
+		    			    messageBox.setProgressText("Building...");
+		    			    messageBox.auto();
+		    			    messageBox.show();
+		    				
+		    			  	CudaOnlineIDE.coiService.buildProject(CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE, coiProject, new AsyncCallback<String[]>() {
+		    		        	
+		    			  		/**
+		    			  		 * Method is called if building of project failed.
+		    			  		 */
+		    					@Override
+		    					public void onFailure(Throwable caught) {
+		    						GWT.log(caught.getMessage());
+		    						messageBox.hide();
+		    		        		Info.display("Build error", "Error in building project.");
+		    		        	}
+
+		    					/**
+		    					 * Method is called if building of project is successful.
+		    					 * 
+		    					 * @param result Build progress.
+		    					 */
+		    					@Override
+		    					public void onSuccess(String[] result) {
+		    						
+		    						messageBox.hide();
+		    						
+		    						if(result == null || result.length == 0) {
+		    							CudaOnlineIDE.aceConsole.setValue("ERROR: Unexpected problem.");
+		    							CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    							return;
+		    						}
+		    						
+		    						if(result.length == 1) {
+		    							CudaOnlineIDE.aceConsole.setValue(result[0]);
+		    							CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    							return;
+		    						}
+
+		    						coiProject.setUuid(result[0]);
+		    						
+		    						for(COIProject coiProjectTmp : CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE.getItems()) {
+		    							if(coiProject.getPath().equals(coiProjectTmp.getPath())) {
+		    								coiProjectTmp.setUuid(result[0]);
+		    								coiProjectTmp.setBuildedOnce(true);
+		    							}
+		    						}
+		    						
+		    						CudaOnlineIDE.aceConsole.setValue(CudaOnlineIDE.aceConsole.getValue() + COIConstants.LINE_SEPARATOR + result[1]);
+		    						CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
+		    						
+		    						Info.display("Build", "Project building.");
+		    					}
+		    				});
+		    			}
+		    		});
+		    	}
+		    }
+	    };
+	    
+	    CudaOnlineIDE.coiService.prebuildGenerating(coiProject, new AsyncCallback<Integer>() {
+
 			@Override
 			public void onFailure(Throwable caught) {
 				GWT.log(caught.getMessage());
-				messageBox.hide();
-        		Info.display("Build error", "Error in building project.");
-        	}
-
-			/**
-			 * Method is called if building of project is successful.
-			 * 
-			 * @param result Build progress.
-			 */
-			@Override
-			public void onSuccess(String[] result) {
-				
-				messageBox.hide();
-				
-				if(result == null || result.length == 0) {
-					CudaOnlineIDE.aceConsole.setValue("ERROR: Unexpected problem.");
-					CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
-					return;
-				}
-				
-				if(result.length == 1) {
-					CudaOnlineIDE.aceConsole.setValue(result[0]);
-					CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
-					return;
-				}
-
-				CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT.setUuid(result[0]);
-				
-				for(COIProject coiProject : CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE.getItems()) {
-					if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT.getPath().equals(coiProject.getPath())) {
-						coiProject.setUuid(result[0]);
-					}
-				}
-				
-				CudaOnlineIDE.aceConsole.setValue(result[1]);
-				CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
-				
-				Info.display("Build", "Project build.");
+				Info.display("Build error", "Error in testing CMakeLists files.");				
 			}
-		});
+
+			@Override
+			public void onSuccess(Integer result) {
+
+				if(result == COIConstants.GENERATING_WITH_QUESTION) {
+					ConfirmMessageBox confirmnBox = new ConfirmMessageBox("Generate CMakeLists.txt", "Are you sure you want to create new CMakeLists.txt and delete your changes?");
+					confirmnBox.addDialogHideHandler(hideHandler);
+					confirmnBox.show();
+				} else {
+					hideHandler.onDialogHide(new DialogHideEvent(PredefinedButton.YES));
+				}
+			}
+	    });		
 	}
 	
 	/**
 	 * Method runs active project.
 	 */
-	private void runProjectMenuToolbar() {
+	public static void runProjectMenuToolbar(final COIProject coiProject) {
 		
-		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
-	  		Info.display("Run error", "No active project.");
-	  		return;
-	  	}
-	  
-		CudaOnlineIDE.aceConsole.setValue("----- RUNNING -----");
+		CudaOnlineIDE.aceConsole.setValue(COIConstants.EMPTY);
 		CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole.getLineCount());
 		
 		final AutoProgressMessageBox messageBox = new AutoProgressMessageBox("Execute", "Executing project, please wait...");
@@ -2716,7 +2975,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	    messageBox.auto();
 	    messageBox.show();
 		
-	  	CudaOnlineIDE.coiService.runProject(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT, new AsyncCallback<String>() {
+	  	CudaOnlineIDE.coiService.runProject(coiProject, new AsyncCallback<String>() {
         	
 	  		/**
 	  		 * Method is called if executing of project failed.
@@ -2761,14 +3020,9 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	/**
 	 * Method opens dialog with active project properties.
 	 */
-	private void openProjectPropertiesMenuToolbar() {
+	public static void openProjectPropertiesMenuToolbar(final COIProject coiProject) {
 		
-		if(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT == null) {
-	  		Info.display("Properties error", "No active project.");
-	  		return;
-	  	}
-	  
-	  	Window propertiesPanel = PopUpWindow.propertiesPanel(CudaOnlineIDE.ACTIVE_CUDA_COI_PROJECT);
+	  	Window propertiesPanel = PopUpWindow.propertiesPanel(coiProject);
 		propertiesPanel.show();			
 	}
 	
@@ -3090,11 +3344,20 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 	}
 	
 	/**
-	 * Method downloads user manual.
+	 * Method opens user manual.
 	 */
 	private void helpMenuToolbar() {
 		
 		String url = "https://dl.dropboxusercontent.com/u/93282530/CudaIDE_manual.pdf";
+		com.google.gwt.user.client.Window.open( url, "_blank", "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes" );
+	}
+	
+	/**
+	 * Method opens CUDA programming guide.
+	 */
+	private void programmingGuideMenuToolbar() {
+		
+		String url = "http://docs.nvidia.com/cuda/cuda-c-programming-guide/";
 		com.google.gwt.user.client.Window.open( url, "_blank", "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes" );
 	}
 	

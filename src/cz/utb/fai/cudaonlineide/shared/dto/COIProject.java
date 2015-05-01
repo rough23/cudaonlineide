@@ -29,11 +29,16 @@ public class COIProject extends COIObject {
 	 * UUID of building.
 	 */
 	private String uuid;
+	/**
+	 * Is builded once.
+	 */
+	private boolean buildedOnce;
 	
 	public COIProject() {
 		super();
 		buildConfiguration = new COIBuildConfiguration();
 		items = new ArrayList<>();
+		buildedOnce = false;
 	}
 	
 	// GETTERS AND SETTERS 
@@ -54,6 +59,12 @@ public class COIProject extends COIObject {
 	}
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
+	}
+	public boolean isBuildedOnce() {
+		return buildedOnce;
+	}
+	public void setBuildedOnce(boolean buildedOnce) {
+		this.buildedOnce = buildedOnce;
 	}
 
 }

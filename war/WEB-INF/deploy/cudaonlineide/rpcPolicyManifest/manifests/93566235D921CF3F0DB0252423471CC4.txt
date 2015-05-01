@@ -1,0 +1,2 @@
+serviceClass: cz.utb.fai.cudaonlineide.client.service.coi.COIService
+path: 9C401DEB6DB9AFF8AD3065A60F2F7839.gwt.rpc

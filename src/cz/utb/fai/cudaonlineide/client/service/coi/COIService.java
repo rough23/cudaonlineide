@@ -200,4 +200,12 @@ public interface COIService extends RemoteService {
 	 * @return Generating progress.
 	 */
 	String generateCMakeLists(String typeOfGenerate, COIProject coiProject);
+	
+	/**
+	 * Method tests if CMakeLists.txt and Makefile exists. Result is important for generating these files before project build.
+	 * 
+	 * @param coiProject Active project.
+	 * @return Number type of necessary generating.
+	 */
+	int prebuildGenerating(COIProject coiProject);
 }

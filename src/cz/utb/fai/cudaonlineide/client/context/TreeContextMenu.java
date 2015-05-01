@@ -9,7 +9,6 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.Window;
-import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.info.Info;
@@ -972,10 +971,7 @@ public class TreeContextMenu {
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					Window propertiesPanel = PopUpWindow
-							.propertiesPanel((COIProject) coiData
-									.getCoiObject());
-					propertiesPanel.show();
+					CudaOnlineIDE.openProjectPropertiesMenuToolbar((COIProject) coiData.getCoiObject());
 				}
 			}
 		});
@@ -1045,44 +1041,7 @@ public class TreeContextMenu {
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.aceConsole
-							.setValue("----- CREATING MAKEFILE -----");
-					CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole
-							.getLineCount());
-
-					final AutoProgressMessageBox messageBox = new AutoProgressMessageBox(
-							"Crate", "Creating makefile, please wait...");
-					messageBox.setProgressText("Creating...");
-					messageBox.auto();
-					messageBox.show();
-
-					TreeContextMenu.coiService.createMakefile(
-							CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE,
-							(COIProject) coiData.getCoiObject(),
-							new AsyncCallback<String>() {
-
-								@Override
-								public void onFailure(Throwable caught) {
-									GWT.log(caught.getMessage());
-									messageBox.hide();
-									Info.display("Makefile error",
-											"Error in creating Makefile project.");
-								}
-
-								@Override
-								public void onSuccess(String result) {
-
-									messageBox.hide();
-
-									CudaOnlineIDE.aceConsole.setValue(result);
-									CudaOnlineIDE.aceConsole
-											.gotoLine(CudaOnlineIDE.aceConsole
-													.getLineCount());
-
-									Info.display("Makefile",
-											"Makefile creating.");
-								}
-							});
+					CudaOnlineIDE.createMakefileMenuToolbar((COIProject) coiData.getCoiObject());
 				}
 			}
 		});
@@ -1113,45 +1072,7 @@ public class TreeContextMenu {
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.aceConsole
-							.setValue("----- GENERATING CMAKELISTS -----");
-					CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole
-							.getLineCount());
-
-					final AutoProgressMessageBox messageBox = new AutoProgressMessageBox(
-							"Generate",
-							"Generating CMakeLists.txt, please wait...");
-					messageBox.setProgressText("Generating...");
-					messageBox.auto();
-					messageBox.show();
-
-					TreeContextMenu.coiService.generateCMakeLists(
-							COIConstants.MENU_EXECUTABLE,
-							(COIProject) coiData.getCoiObject(),
-							new AsyncCallback<String>() {
-
-								@Override
-								public void onFailure(Throwable caught) {
-									GWT.log(caught.getMessage());
-									messageBox.hide();
-									Info.display("CMake error",
-											"Error in creating CMakeLists.");
-								}
-
-								@Override
-								public void onSuccess(String result) {
-
-									messageBox.hide();
-
-									CudaOnlineIDE.aceConsole.setValue(result);
-									CudaOnlineIDE.aceConsole
-											.gotoLine(CudaOnlineIDE.aceConsole
-													.getLineCount());
-
-									Info.display("CMake",
-											"CMakeLists generating.");
-								}
-							});
+					CudaOnlineIDE.generateCMakeListsMenuToolbar((COIProject) coiData.getCoiObject(), COIConstants.MENU_EXECUTABLE);
 				}
 			}
 		});
@@ -1182,74 +1103,7 @@ public class TreeContextMenu {
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.aceConsole.setValue("----- BUILDING -----");
-					CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole
-							.getLineCount());
-
-					final AutoProgressMessageBox messageBox = new AutoProgressMessageBox(
-							"Build", "Building project, please wait...");
-					messageBox.setProgressText("Building...");
-					messageBox.auto();
-					messageBox.show();
-
-					TreeContextMenu.coiService.buildProject(
-							CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE,
-							(COIProject) coiData.getCoiObject(),
-							new AsyncCallback<String[]>() {
-
-								@Override
-								public void onFailure(Throwable caught) {
-									GWT.log(caught.getMessage());
-									messageBox.hide();
-									Info.display("Build error",
-											"Error in building project.");
-								}
-
-								@Override
-								public void onSuccess(String[] result) {
-
-									messageBox.hide();
-
-									if (result == null || result.length == 0) {
-										CudaOnlineIDE.aceConsole
-												.setValue("ERROR: Unexpected problem.");
-										CudaOnlineIDE.aceConsole
-												.gotoLine(CudaOnlineIDE.aceConsole
-														.getLineCount());
-										return;
-									}
-
-									if (result.length == 1) {
-										CudaOnlineIDE.aceConsole
-												.setValue(result[0]);
-										CudaOnlineIDE.aceConsole
-												.gotoLine(CudaOnlineIDE.aceConsole
-														.getLineCount());
-										return;
-									}
-
-									COIProject coiProjectTree = (COIProject) coiData
-											.getCoiObject();
-									coiProjectTree.setUuid(result[0]);
-
-									for (COIProject coiProject : CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE
-											.getItems()) {
-										if (coiProjectTree.getPath().equals(
-												coiProject.getPath())) {
-											coiProject.setUuid(result[0]);
-										}
-									}
-
-									CudaOnlineIDE.aceConsole
-											.setValue(result[1]);
-									CudaOnlineIDE.aceConsole
-											.gotoLine(CudaOnlineIDE.aceConsole
-													.getLineCount());
-
-									Info.display("Build",
-											"Project build.");
-								}
-							});
+					CudaOnlineIDE.buildProjectMenuToolbar((COIProject) coiData.getCoiObject()); 
 				}
 			}
 		});
@@ -1279,61 +1133,8 @@ public class TreeContextMenu {
 				final COIData coiData = t.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
-
-					CudaOnlineIDE.aceConsole.setValue("----- RUNNING -----");
-					CudaOnlineIDE.aceConsole.gotoLine(CudaOnlineIDE.aceConsole
-							.getLineCount());
-
-					final AutoProgressMessageBox messageBox = new AutoProgressMessageBox(
-							"Execute", "Executing project, please wait...");
-					messageBox.setProgressText("Executing...");
-					messageBox.auto();
-					messageBox.show();
-
-					TreeContextMenu.coiService.runProject(
-							(COIProject) coiData.getCoiObject(),
-							new AsyncCallback<String>() {
-
-								@Override
-								public void onFailure(Throwable caught) {
-									GWT.log(caught.getMessage());
-									messageBox.hide();
-									Info.display("Run error",
-											"Error in running project.");
-								}
-
-								@Override
-								public void onSuccess(String result) {
-
-									messageBox.hide();
-
-									if (result == null || result.isEmpty()) {
-										CudaOnlineIDE.aceConsole
-												.setValue("ERROR: Unexpected problem.");
-										CudaOnlineIDE.aceConsole
-												.gotoLine(CudaOnlineIDE.aceConsole
-														.getLineCount());
-										return;
-									}
-
-									if (result.startsWith("ERROR")) {
-										CudaOnlineIDE.aceConsole
-												.setValue(result);
-										CudaOnlineIDE.aceConsole
-												.gotoLine(CudaOnlineIDE.aceConsole
-														.getLineCount());
-										return;
-									}
-
-									CudaOnlineIDE.aceConsole.setValue(result);
-									CudaOnlineIDE.aceConsole
-											.gotoLine(CudaOnlineIDE.aceConsole
-													.getLineCount());
-
-									Info.display("Execute",
-											"Project executing.");
-								}
-							});
+					
+					CudaOnlineIDE.runProjectMenuToolbar((COIProject) coiData.getCoiObject());
 				}
 			}
 		});

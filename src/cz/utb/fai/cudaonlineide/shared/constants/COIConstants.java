@@ -53,6 +53,7 @@ public class COIConstants {
 	public static final String MENU_PROPERTIES = "Properties";
 	public static final String MENU_ABOUT = "About";
 	public static final String MENU_HELP = "Help";
+	public static final String MENU_CUDA_PROGRAMMING_GUIDE = "CUDA C help";
 	
 	public static final String MENUTOOLBAR_LOG = "Log";
 	public static final String MENUTOOLBAR_USER = "User";
@@ -114,6 +115,9 @@ public class COIConstants {
 	public static final List<String> BUILD_CONFIGURATION_COMPILER_OPTIONS_DEBUG = Arrays.asList("-g", "-O0", "-Wall");
 	public static final List<String> BUILD_CONFIGURATION_COMPILER_OPTIONS_RELEASE = Arrays.asList("-O2", "-Wall");
 	public static final List<String> BUILD_CONFIGURATION_LINKER_OPTIONS = new ArrayList<String>();
+	
+	public static final int GENERATING_ALL = 1;
+	public static final int GENERATING_WITH_QUESTION = 2;
 	
 	public static final String ZIP_EXTENSION = ".zip";
 

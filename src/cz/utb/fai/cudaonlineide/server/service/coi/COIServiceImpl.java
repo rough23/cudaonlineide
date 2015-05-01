@@ -304,15 +304,22 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 	 */
 	@Override
 	public String createMakefile(final COIWorkspace coiWorkspace, final COIProject coiProject) {
-
+		
 		if (!RPCVerifier.isCOIProjectCorrect(coiProject)) {
 			throw new IllegalArgumentException("COIProject has not correct form. Server info: " + getServletContext().getServerInfo());
+		}
+		
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
 		}
 		
 		System.out.println("COIServiceImpl LOG [Creating makefile for project " + coiProject.getName() + "]");
 		
 		File cMakeLists = new File(coiProject.getPath() + "build/CMakeLists.txt");
-				
+		File cMakeListsBckp = new File(coiProject.getPath() + "build/CMakeLists.txt.backup");		
+		
 		if(!cMakeLists.exists()) {
 			
 			try {
@@ -329,7 +336,10 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 		try {
 		
 			File cMakeListsTmp = new File(coiProject.getPath() + "CMakeLists.txt");
+			File cMakeListsBckpTmp = new File(coiProject.getPath() + "CMakeLists.txt.backup");
+			
 			FileUtils.copyFile(cMakeLists, cMakeListsTmp);
+			FileUtils.copyFile(cMakeListsBckp, cMakeListsBckpTmp);
 			
 			File buildFolder = new File(coiProject.getPath() + "build/");
 			
@@ -338,8 +348,12 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 			}
 			
 			buildFolder.mkdir();
+			
 			FileUtils.copyFile(cMakeListsTmp, cMakeLists);
+			FileUtils.copyFile(cMakeListsBckpTmp, cMakeListsBckp);
+			
 			cMakeListsTmp.delete();
+			cMakeListsBckpTmp.delete();
 
 			final StringBuilder sb = new StringBuilder();
 			
@@ -457,14 +471,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 		        p_stdinForPermissions.newLine();
 		        p_stdinForPermissions.flush();
 			    
-		        Thread preBuildThread = new Thread() {				
-					@Override
-					public void run() {
-						COIServiceImpl.this.buildProject(coiWorkspace, coiProject);
-					}
-				};
-		        
-				preBuildThread.start();
+				COIServiceImpl.this.buildProject(coiWorkspace, coiProject);
 				
 			    return "----- CREATING MAKEFILE -----" + System.lineSeparator() + sb.toString().replace("-- ", "");
 		    
@@ -477,6 +484,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 			Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
 			return "ERROR: Cannot copy CMakeLists.txt for creating makefile.";
 		}
+		
 	}
 	
 	/**
@@ -496,7 +504,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 		if (!RPCVerifier.isStringWithValue(typeOfGenerate)) {
 			throw new IllegalArgumentException("Type of generate has not correct form. Server info: " + getServletContext().getServerInfo());
 		}
-
+		
 		System.out.println("COIServiceImpl LOG [Generate CMakeLists.txt for project " + coiProject.getName() + "]");
 		
 		List<String> executablesForBuild = new ArrayList<>();
@@ -660,14 +668,18 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 				bw.write(")" + System.lineSeparator() + System.lineSeparator());
 			}
 			
+			bw.flush();
 			bw.close();
-		    
+			
+			File cMakeListsBckp = new File(coiProject.getPath() + "build/CMakeLists.txt.backup");
+			FileUtils.copyFile(cMakeLists, cMakeListsBckp);
+			
 		} catch (IOException e) {
 			Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
 			return "ERROR: Problem with creating CMakeLists.txt.";
 		}
 		
-		sb.append("Generating CMakeLists.txt was successfully completed.");
+		sb.append("Generating CMakeLists.txt was successfully completed.").append(System.lineSeparator());
 		return sb.toString();
 	}
 	
@@ -680,9 +692,15 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 	 */
 	@Override
 	public String[] buildProject(COIWorkspace coiWorkspace, final COIProject coiProject) {
-
+		
 		if (!RPCVerifier.isCOIProjectCorrect(coiProject)) {
 			throw new IllegalArgumentException("COIProject has not correct form to store. Server info: " + getServletContext().getServerInfo());
+		}
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
 		}
 		
 		System.out.println("COIServiceImpl LOG [Building project " + coiProject.getName() + "]");
@@ -878,7 +896,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 	 * @return Building progress.
 	 */
 	private String[] buildProjectRemote(COIWorkspace coiWorkspace, final COIProject coiProject) {
-		
+				
 		try {
 			String zipName = coiProject.getName() + COIConstants.ZIP_EXTENSION;
 			String zipPath = coiWorkspace.getPath() + zipName;
@@ -971,6 +989,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 			String[] output = {"ERROR: Problem with getting response from server."};
 			return output;
 		}
+		
 	}
 	
 	/**
@@ -1096,7 +1115,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 			
 			runThread.start();
 			
-			int i = 15;
+			int i = 20;
 			
 			while(i > 0) {
 				
@@ -1135,7 +1154,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 			}
 			
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
 			}
@@ -1172,7 +1191,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
         	
 		String result[] = null;
         	
-    	int i = 15;
+    	int i = 20;
     	
     	while(result == null && i > 0) {
     		
@@ -1622,6 +1641,63 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
         	Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
         	throw new IllegalArgumentException("Error in saving makefile. Server info: " + getServletContext().getServerInfo());
         }
+	}
+	
+	/**
+	 * Method tests if CMakeLists.txt and Makefile exists. Result is important for generating these files before project build.
+	 * 
+	 * @param coiProject Active project.
+	 * @return Number type of necessary generating.
+	 */
+	public int prebuildGenerating(COIProject coiProject) {
+		
+		File cMakeLists = new File(coiProject.getPath() + "build/CMakeLists.txt");
+		File cMakeListsBckp = new File(coiProject.getPath() + "build/CMakeLists.txt.backup");
+		
+		if(!cMakeLists.exists() || !cMakeListsBckp.exists()) {
+			return COIConstants.GENERATING_ALL;
+		}
+		
+		String cMakeListsText = "";
+		String cMakeListsBckpText = "";
+		
+		try (FileReader inputFile = new FileReader(cMakeLists)) {
+			try (BufferedReader bufferReader = new BufferedReader(inputFile)) {
+				
+				String line;
+				StringBuilder sb = new StringBuilder();
+		
+				while ((line = bufferReader.readLine()) != null)   {
+					sb.append(line).append(System.lineSeparator());
+				}
+				
+				cMakeListsText = sb.toString();
+			}
+		} catch (IOException e) {
+			Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
+		}
+		
+		try (FileReader inputFile = new FileReader(cMakeListsBckp)) {
+			try (BufferedReader bufferReader = new BufferedReader(inputFile)) {
+				
+				String line;
+				StringBuilder sb = new StringBuilder();
+		
+				while ((line = bufferReader.readLine()) != null)   {
+					sb.append(line).append(System.lineSeparator());
+				}
+				
+				cMakeListsBckpText = sb.toString();
+			}
+		} catch (IOException e) {
+			Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
+		}
+		
+		if(cMakeListsText.equals(cMakeListsBckpText)) {
+			return COIConstants.GENERATING_ALL;
+		}
+		
+		return COIConstants.GENERATING_WITH_QUESTION;
 	}
 	
   	/**
@@ -2084,14 +2160,18 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
   	
   		System.out.println("COIServiceImpl LOG [Making relative path in " + cmakeFile.getPath() + "]");
   		
-  		if(!cmakeFile.exists()) {	
+  		int cMakeTimer = 5;
+  		
+  		while(!cmakeFile.exists()) {	
   			try {
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
 			}
   			
-  			if(!cmakeFile.exists()) {
+  			cMakeTimer--;
+  			
+  			if(cMakeTimer == 0) {
   				return;
   			}
   		}
