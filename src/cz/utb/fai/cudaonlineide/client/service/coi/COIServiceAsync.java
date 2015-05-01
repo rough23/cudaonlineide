@@ -218,7 +218,7 @@ public interface COIServiceAsync {
 	 * Method tests if CMakeLists.txt and Makefile exists. Result is important for generating these files before project build.
 	 * 
 	 * @param coiProject Active project.
-	 * @param Asynchronous callback with number type of necessary generating.
+	 * @param callback Asynchronous callback with number type of necessary generating.
 	 */
 	void prebuildGenerating(COIProject coiProject, 
 			AsyncCallback<Integer> callback);
