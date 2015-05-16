@@ -7,20 +7,16 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
-import com.sencha.gxt.widget.core.client.tree.Tree;
 
 import cz.utb.fai.cudaonlineide.client.CudaOnlineIDE;
 import cz.utb.fai.cudaonlineide.client.dto.COIData;
 import cz.utb.fai.cudaonlineide.client.popup.PopUpWindow;
-import cz.utb.fai.cudaonlineide.client.service.coi.COIService;
-import cz.utb.fai.cudaonlineide.client.service.coi.COIServiceAsync;
 import cz.utb.fai.cudaonlineide.client.utils.MenuToolbarIcons;
 import cz.utb.fai.cudaonlineide.shared.constants.COIConstants;
 import cz.utb.fai.cudaonlineide.shared.dto.COIEnum;
@@ -39,20 +35,12 @@ import cz.utb.fai.cudaonlineide.shared.dto.project.COIBuildConfiguration;
  */
 public class TreeContextMenu {
 
-	private final static COIServiceAsync coiService = GWT
-			.create(COIService.class);
-
 	/**
 	 * New file context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return new file context item.
 	 */
-	public static MenuItem getNewFileContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getNewFileContextMenu() {
 
 		MenuItem newFile = new MenuItem();
 		newFile.setIcon(MenuToolbarIcons.PROVIDER.menuNew());
@@ -61,7 +49,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -112,7 +101,7 @@ public class TreeContextMenu {
 									}
 								}
 
-								TreeContextMenu.coiService.createNewFile(
+								CudaOnlineIDE.coiService.createNewFile(
 										coiWorkspace, coiFile,
 										new AsyncCallback<Boolean>() {
 
@@ -136,12 +125,19 @@ public class TreeContextMenu {
 															coiFile.getPath(),
 															coiFile.getText(),
 															coiFile);
-													s.add(coiData, childCoiData);
-													t.setExpanded(coiData, true);
-													t.setSize(
-															COIConstants.SIZE_100_PERCENTAGE,
-															COIConstants.SIZE_100_PERCENTAGE);
-													t.focus();
+													CudaOnlineIDE.coiDataTreeStore
+															.add(coiData,
+																	childCoiData);
+													CudaOnlineIDE.coiDataTree
+															.setExpanded(
+																	coiData,
+																	true);
+													CudaOnlineIDE.coiDataTree
+															.setSize(
+																	COIConstants.SIZE_100_PERCENTAGE,
+																	COIConstants.SIZE_100_PERCENTAGE);
+													CudaOnlineIDE.coiDataTree
+															.focus();
 													Info.display(
 															"Create",
 															"File "
@@ -168,14 +164,9 @@ public class TreeContextMenu {
 	/**
 	 * New folder context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return new folder context item.
 	 */
-	public static MenuItem getNewFolderContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getNewFolderContextMenu() {
 
 		MenuItem newFolder = new MenuItem();
 		newFolder.setIcon(MenuToolbarIcons.PROVIDER.menuAdd());
@@ -184,7 +175,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -220,7 +212,7 @@ public class TreeContextMenu {
 									}
 								}
 
-								TreeContextMenu.coiService.createNewFolder(
+								CudaOnlineIDE.coiService.createNewFolder(
 										coiWorkspace, coiFolder,
 										new AsyncCallback<Boolean>() {
 
@@ -240,12 +232,19 @@ public class TreeContextMenu {
 															coiFolder.getName(),
 															coiFolder.getPath(),
 															null, coiFolder);
-													s.add(coiData, childCoiData);
-													t.setExpanded(coiData, true);
-													t.setSize(
-															COIConstants.SIZE_100_PERCENTAGE,
-															COIConstants.SIZE_100_PERCENTAGE);
-													t.focus();
+													CudaOnlineIDE.coiDataTreeStore
+															.add(coiData,
+																	childCoiData);
+													CudaOnlineIDE.coiDataTree
+															.setExpanded(
+																	coiData,
+																	true);
+													CudaOnlineIDE.coiDataTree
+															.setSize(
+																	COIConstants.SIZE_100_PERCENTAGE,
+																	COIConstants.SIZE_100_PERCENTAGE);
+													CudaOnlineIDE.coiDataTree
+															.focus();
 													Info.display(
 															"Create",
 															"Folder "
@@ -272,14 +271,9 @@ public class TreeContextMenu {
 	/**
 	 * New project context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return new project context item.
 	 */
-	public static MenuItem getNewProjectContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getNewProjectContextMenu() {
 
 		MenuItem newProject = new MenuItem();
 		newProject.setIcon(MenuToolbarIcons.PROVIDER.menuAdd());
@@ -288,7 +282,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -323,7 +318,7 @@ public class TreeContextMenu {
 								COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
 								coiWorkspace.getItems().add(coiProject);
 
-								TreeContextMenu.coiService.createNewProject(
+								CudaOnlineIDE.coiService.createNewProject(
 										coiWorkspace, coiProject,
 										new AsyncCallback<Boolean>() {
 
@@ -345,12 +340,19 @@ public class TreeContextMenu {
 															coiProject
 																	.getPath(),
 															null, coiProject);
-													s.add(coiData, childCoiData);
-													t.setExpanded(coiData, true);
-													t.setSize(
-															COIConstants.SIZE_100_PERCENTAGE,
-															COIConstants.SIZE_100_PERCENTAGE);
-													t.focus();
+													CudaOnlineIDE.coiDataTreeStore
+															.add(coiData,
+																	childCoiData);
+													CudaOnlineIDE.coiDataTree
+															.setExpanded(
+																	coiData,
+																	true);
+													CudaOnlineIDE.coiDataTree
+															.setSize(
+																	COIConstants.SIZE_100_PERCENTAGE,
+																	COIConstants.SIZE_100_PERCENTAGE);
+													CudaOnlineIDE.coiDataTree
+															.focus();
 													Info.display(
 															"Create",
 															"Project "
@@ -377,14 +379,9 @@ public class TreeContextMenu {
 	/**
 	 * Delete objects context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return delete object context item.
 	 */
-	public static MenuItem getDeleteInContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getDeleteInContextMenu() {
 
 		MenuItem delete = new MenuItem();
 		delete.setIcon(MenuToolbarIcons.PROVIDER.menuDelete());
@@ -394,14 +391,16 @@ public class TreeContextMenu {
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					s.remove(coiData);
-					t.setSize(COIConstants.SIZE_100_PERCENTAGE,
+					CudaOnlineIDE.coiDataTreeStore.remove(coiData);
+					CudaOnlineIDE.coiDataTree.setSize(
+							COIConstants.SIZE_100_PERCENTAGE,
 							COIConstants.SIZE_100_PERCENTAGE);
-					t.focus();
+					CudaOnlineIDE.coiDataTree.focus();
 
 					COIObject coiObject = coiData.getCoiObject();
 					COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
@@ -474,9 +473,8 @@ public class TreeContextMenu {
 						Info.display("Delete", "Nothing to delete.");
 					}
 
-					TreeContextMenu.coiService.deleteFromWorkspace(
-							coiWorkspace, coiObject,
-							new AsyncCallback<Boolean>() {
+					CudaOnlineIDE.coiService.deleteFromWorkspace(coiWorkspace,
+							coiObject, new AsyncCallback<Boolean>() {
 
 								@Override
 								public void onFailure(Throwable caught) {
@@ -507,14 +505,9 @@ public class TreeContextMenu {
 	/**
 	 * Upload file context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return upload file context item.
 	 */
-	public static MenuItem getUploadFileContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getUploadFileContextMenu() {
 
 		MenuItem uploadFile = new MenuItem();
 		uploadFile.setIcon(MenuToolbarIcons.PROVIDER.menuUpload());
@@ -523,7 +516,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -577,7 +571,7 @@ public class TreeContextMenu {
 									}
 								}
 
-								TreeContextMenu.coiService.updateWorkspace(
+								CudaOnlineIDE.coiService.updateWorkspace(
 										coiWorkspace,
 										new AsyncCallback<Void>() {
 
@@ -600,12 +594,18 @@ public class TreeContextMenu {
 														coiFile.getPath(),
 														coiFile.getText(),
 														coiFile);
-												s.add(coiData, childCoiData);
-												t.setExpanded(coiData, true);
-												t.setSize(
-														COIConstants.SIZE_100_PERCENTAGE,
-														COIConstants.SIZE_100_PERCENTAGE);
-												t.focus();
+												CudaOnlineIDE.coiDataTreeStore
+														.add(coiData,
+																childCoiData);
+												CudaOnlineIDE.coiDataTree
+														.setExpanded(coiData,
+																true);
+												CudaOnlineIDE.coiDataTree
+														.setSize(
+																COIConstants.SIZE_100_PERCENTAGE,
+																COIConstants.SIZE_100_PERCENTAGE);
+												CudaOnlineIDE.coiDataTree
+														.focus();
 											}
 										});
 							}
@@ -621,14 +621,9 @@ public class TreeContextMenu {
 	/**
 	 * Upload folder context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return upload folder context item.
 	 */
-	public static MenuItem getUploadFolderContextMenu(
-			final TreeStore<COIData> s, final Tree<COIData, String> t) {
+	public static MenuItem getUploadFolderContextMenu() {
 
 		MenuItem uploadFolder = new MenuItem();
 		uploadFolder.setIcon(MenuToolbarIcons.PROVIDER.menuUpload());
@@ -637,7 +632,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -674,7 +670,7 @@ public class TreeContextMenu {
 								return;
 							}
 
-							TreeContextMenu.coiService
+							CudaOnlineIDE.coiService
 									.updateWorkspaceUploadFolder(
 											CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE,
 											coiProject.getPath(),
@@ -713,8 +709,9 @@ public class TreeContextMenu {
 																coiFolder
 																		.getPath(),
 																null, coiFolder);
-														s.add(coiData,
-																childCoiData);
+														CudaOnlineIDE.coiDataTreeStore
+																.add(coiData,
+																		childCoiData);
 
 														for (COIFile coiFile : coiFolder
 																.getItems()) {
@@ -726,16 +723,21 @@ public class TreeContextMenu {
 																	coiFile.getPath(),
 																	coiFile.getText(),
 																	coiFile);
-															s.add(childCoiData,
-																	childChildCoiData);
+															CudaOnlineIDE.coiDataTreeStore
+																	.add(childCoiData,
+																			childChildCoiData);
 														}
 
-														t.setExpanded(coiData,
-																true);
-														t.setSize(
-																COIConstants.SIZE_100_PERCENTAGE,
-																COIConstants.SIZE_100_PERCENTAGE);
-														t.focus();
+														CudaOnlineIDE.coiDataTree
+																.setExpanded(
+																		coiData,
+																		true);
+														CudaOnlineIDE.coiDataTree
+																.setSize(
+																		COIConstants.SIZE_100_PERCENTAGE,
+																		COIConstants.SIZE_100_PERCENTAGE);
+														CudaOnlineIDE.coiDataTree
+																.focus();
 
 														Info.display(
 																"Upload success",
@@ -755,14 +757,9 @@ public class TreeContextMenu {
 	/**
 	 * Upload project context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return upload project context item.
 	 */
-	public static MenuItem getUploadProjectContextMenu(
-			final TreeStore<COIData> s, final Tree<COIData, String> t) {
+	public static MenuItem getUploadProjectContextMenu() {
 
 		MenuItem uploadProject = new MenuItem();
 		uploadProject.setIcon(MenuToolbarIcons.PROVIDER.menuUpload());
@@ -771,7 +768,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -808,7 +806,7 @@ public class TreeContextMenu {
 								return;
 							}
 
-							TreeContextMenu.coiService
+							CudaOnlineIDE.coiService
 									.updateWorkspaceUploadProject(
 											CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE,
 											coiWorkspace.getPath(),
@@ -848,8 +846,9 @@ public class TreeContextMenu {
 																		.getPath(),
 																null,
 																coiProject);
-														s.add(coiData,
-																childCoiData);
+														CudaOnlineIDE.coiDataTreeStore
+																.add(coiData,
+																		childCoiData);
 
 														for (COIFolder coiFolder : coiProject
 																.getItems()) {
@@ -861,8 +860,9 @@ public class TreeContextMenu {
 																			.getPath(),
 																	null,
 																	coiFolder);
-															s.add(childCoiData,
-																	childChildCoiData);
+															CudaOnlineIDE.coiDataTreeStore
+																	.add(childCoiData,
+																			childChildCoiData);
 
 															for (COIFile coiFile : coiFolder
 																	.getItems()) {
@@ -874,17 +874,22 @@ public class TreeContextMenu {
 																		coiFile.getPath(),
 																		coiFile.getText(),
 																		coiFile);
-																s.add(childChildCoiData,
-																		childChildChildCoiData);
+																CudaOnlineIDE.coiDataTreeStore
+																		.add(childChildCoiData,
+																				childChildChildCoiData);
 															}
 														}
 
-														t.setExpanded(coiData,
-																true);
-														t.setSize(
-																COIConstants.SIZE_100_PERCENTAGE,
-																COIConstants.SIZE_100_PERCENTAGE);
-														t.focus();
+														CudaOnlineIDE.coiDataTree
+																.setExpanded(
+																		coiData,
+																		true);
+														CudaOnlineIDE.coiDataTree
+																.setSize(
+																		COIConstants.SIZE_100_PERCENTAGE,
+																		COIConstants.SIZE_100_PERCENTAGE);
+														CudaOnlineIDE.coiDataTree
+																.focus();
 
 														Info.display(
 																"Upload success",
@@ -904,14 +909,9 @@ public class TreeContextMenu {
 	/**
 	 * Download context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return download context item.
 	 */
-	public static MenuItem getUniversalDownloadContextMenu(
-			final TreeStore<COIData> s, final Tree<COIData, String> t) {
+	public static MenuItem getUniversalDownloadContextMenu() {
 
 		MenuItem newFile = new MenuItem();
 		newFile.setIcon(MenuToolbarIcons.PROVIDER.menuDownload());
@@ -920,7 +920,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				COIData coiData = t.getSelectionModel().getSelectedItem();
+				COIData coiData = CudaOnlineIDE.coiDataTree.getSelectionModel()
+						.getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
@@ -951,14 +952,9 @@ public class TreeContextMenu {
 	/**
 	 * Project properties context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return project properties context item.
 	 */
-	public static MenuItem getPropertiesContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getPropertiesContextMenu() {
 
 		MenuItem properties = new MenuItem();
 		properties.setIcon(MenuToolbarIcons.PROVIDER.menuProperties());
@@ -967,11 +963,14 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.openProjectPropertiesMenuToolbar((COIProject) coiData.getCoiObject());
+					CudaOnlineIDE
+							.openProjectPropertiesMenuToolbar((COIProject) coiData
+									.getCoiObject());
 				}
 			}
 		});
@@ -982,14 +981,9 @@ public class TreeContextMenu {
 	/**
 	 * Setting active project context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return setting active project context item.
 	 */
-	public static MenuItem getSetAsActiveContextMenu(
-			final TreeStore<COIData> s, final Tree<COIData, String> t) {
+	public static MenuItem getSetAsActiveContextMenu() {
 
 		MenuItem setAsActive = new MenuItem();
 		setAsActive.setIcon(MenuToolbarIcons.PROVIDER.projectActive());
@@ -998,7 +992,8 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 					COIProject coiProject = (COIProject) coiData.getCoiObject();
@@ -1006,10 +1001,11 @@ public class TreeContextMenu {
 					CudaOnlineIDE
 							.updateBuildConfigurationComboBoxByActiveProject();
 
-					List<COIData> coiDataList = s.getAll();
+					List<COIData> coiDataList = CudaOnlineIDE.coiDataTreeStore
+							.getAll();
 
 					for (COIData model : coiDataList) {
-						t.refresh(model);
+						CudaOnlineIDE.coiDataTree.refresh(model);
 					}
 				}
 			}
@@ -1021,14 +1017,9 @@ public class TreeContextMenu {
 	/**
 	 * Creating makefile context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return creating makefile context item.
 	 */
-	public static MenuItem getCreateMakefileContextMenu(
-			final TreeStore<COIData> s, final Tree<COIData, String> t) {
+	public static MenuItem getCreateMakefileContextMenu() {
 
 		MenuItem build = new MenuItem();
 		build.setIcon(MenuToolbarIcons.PROVIDER.menuCmake());
@@ -1037,11 +1028,14 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.createMakefileMenuToolbar((COIProject) coiData.getCoiObject());
+					CudaOnlineIDE
+							.createMakefileMenuToolbar((COIProject) coiData
+									.getCoiObject());
 				}
 			}
 		});
@@ -1052,14 +1046,9 @@ public class TreeContextMenu {
 	/**
 	 * Generating CMakeLists.txt context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return generating CMakeLists.txt context item.
 	 */
-	public static MenuItem getGenerateCMakeListsContextMenu(
-			final TreeStore<COIData> s, final Tree<COIData, String> t) {
+	public static MenuItem getGenerateCMakeListsContextMenu() {
 
 		MenuItem generate = new MenuItem();
 		generate.setIcon(MenuToolbarIcons.PROVIDER.menuCmakeLists());
@@ -1068,11 +1057,14 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.generateCMakeListsMenuToolbar((COIProject) coiData.getCoiObject(), COIConstants.MENU_EXECUTABLE);
+					CudaOnlineIDE.generateCMakeListsMenuToolbar(
+							(COIProject) coiData.getCoiObject(),
+							COIConstants.MENU_EXECUTABLE);
 				}
 			}
 		});
@@ -1082,15 +1074,10 @@ public class TreeContextMenu {
 
 	/**
 	 * Building project context menu builder.
-	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
+	 *
 	 * @return Return building project context item.
 	 */
-	public static MenuItem getBuildContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getBuildContextMenu() {
 
 		MenuItem build = new MenuItem();
 		build.setIcon(MenuToolbarIcons.PROVIDER.menuBuild());
@@ -1099,11 +1086,13 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
 
-					CudaOnlineIDE.buildProjectMenuToolbar((COIProject) coiData.getCoiObject()); 
+					CudaOnlineIDE.buildProjectMenuToolbar((COIProject) coiData
+							.getCoiObject());
 				}
 			}
 		});
@@ -1114,14 +1103,9 @@ public class TreeContextMenu {
 	/**
 	 * Executing project context menu builder.
 	 * 
-	 * @param s
-	 *            Active tree store.
-	 * @param t
-	 *            Active project explorer tree.
 	 * @return Return executing project context item.
 	 */
-	public static MenuItem getRunContextMenu(final TreeStore<COIData> s,
-			final Tree<COIData, String> t) {
+	public static MenuItem getRunContextMenu() {
 
 		MenuItem build = new MenuItem();
 		build.setIcon(MenuToolbarIcons.PROVIDER.menuRun());
@@ -1130,11 +1114,13 @@ public class TreeContextMenu {
 
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
-				final COIData coiData = t.getSelectionModel().getSelectedItem();
+				final COIData coiData = CudaOnlineIDE.coiDataTree
+						.getSelectionModel().getSelectedItem();
 				if (coiData != null && coiData.getPath() != null
 						&& coiData.getCoiObject() != null) {
-					
-					CudaOnlineIDE.runProjectMenuToolbar((COIProject) coiData.getCoiObject());
+
+					CudaOnlineIDE.runProjectMenuToolbar((COIProject) coiData
+							.getCoiObject());
 				}
 			}
 		});

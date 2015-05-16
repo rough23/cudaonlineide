@@ -8,7 +8,6 @@ package cz.utb.fai.cudaonlineide.shared.constants;
  */
 public class WorkspaceConstants {
 
-//	public static final String CUDA_WORK_FOLDER = "/home/martin/CudaOnlineIDE/";
 	public static final String CUDA_WORK_FOLDER = "/home/cuda-virt/COIDEProjects/";
 	public static final String USER_TO_LOG_FILE = "userToLog.cuf";
 	

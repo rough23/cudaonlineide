@@ -925,7 +925,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 	        	uuid = bs.uploadAndBuild(zipToDownload);		        
 	        	zipToDownload.delete();
 
-	        	int i = 15;
+	        	int i = 30;
 	        	
 	        	while(result == null && i > 0) {
 	        		

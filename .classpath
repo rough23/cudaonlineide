@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gson-2.3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AceGWT"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-websockets-1.1.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/javax.mail-1.5.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/httpclient-4.4.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/httpmime-4.4.1.jar"/>

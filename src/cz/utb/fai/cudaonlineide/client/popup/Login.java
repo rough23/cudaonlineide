@@ -19,8 +19,6 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.info.Info;
 
 import cz.utb.fai.cudaonlineide.client.CudaOnlineIDE;
-import cz.utb.fai.cudaonlineide.client.service.login.LoginService;
-import cz.utb.fai.cudaonlineide.client.service.login.LoginServiceAsync;
 import cz.utb.fai.cudaonlineide.shared.constants.COIConstants;
 import cz.utb.fai.cudaonlineide.shared.constants.WorkspaceConstants;
 import cz.utb.fai.cudaonlineide.shared.dto.COIUser;
@@ -32,9 +30,6 @@ import cz.utb.fai.cudaonlineide.shared.dto.COIUser;
  * 
  */
 public class Login {
-
-	public static LoginServiceAsync loginService = GWT
-			.create(LoginService.class);
 
 	/**
 	 * Creating of login pop up window.
@@ -79,10 +74,7 @@ public class Login {
 				String loginText = login.getText();
 				String passwordText = password.getText();
 
-				// String sha1password =
-				// Sha1Utils.getSha1Digest(password.getText());
-
-				loginService.loginServer(loginText, passwordText,
+				CudaOnlineIDE.loginService.loginServer(loginText, passwordText,
 						new AsyncCallback<COIUser>() {
 
 							@Override

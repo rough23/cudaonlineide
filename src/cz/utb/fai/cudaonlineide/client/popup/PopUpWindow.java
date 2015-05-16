@@ -44,8 +44,6 @@ import com.sencha.gxt.widget.core.client.form.FormPanel.Method;
 import com.sencha.gxt.widget.core.client.info.Info;
 
 import cz.utb.fai.cudaonlineide.client.CudaOnlineIDE;
-import cz.utb.fai.cudaonlineide.client.service.coi.COIService;
-import cz.utb.fai.cudaonlineide.client.service.coi.COIServiceAsync;
 import cz.utb.fai.cudaonlineide.client.utils.MenuToolbarIcons;
 import cz.utb.fai.cudaonlineide.shared.constants.COIConstants;
 import cz.utb.fai.cudaonlineide.shared.dto.COIEnum;
@@ -85,9 +83,6 @@ public class PopUpWindow {
 	public static final String GOTOLINE = "gotoline";
 	public static final String INSERTATCURSOR = "insertatcursor";
 	public static final String TABSIZE = "tabsize";
-
-	private final static COIServiceAsync coiService = GWT
-			.create(COIService.class);
 
 	/**
 	 * Creating of new file pop up window.
@@ -438,7 +433,7 @@ public class PopUpWindow {
 			@Override
 			public void onSelect(SelectEvent event) {
 
-				PopUpWindow.coiService.getUserWorkspaceFiles(
+				CudaOnlineIDE.coiService.getUserWorkspaceFiles(
 						CudaOnlineIDE.ACTIVE_CUDA_FOLDER,
 						new AsyncCallback<List<String>>() {
 							public void onFailure(Throwable caught) {
@@ -1500,7 +1495,7 @@ public class PopUpWindow {
 		VerticalLayoutContainer p = new VerticalLayoutContainer();
 		panel.add(p);
 
-		final TextButton okButton = new TextButton("OK");
+		final TextButton okButton = new TextButton(COIConstants.BUTTON_OK);
 		final TextButton cancelButton = new TextButton(
 				COIConstants.BUTTON_CANCEL);
 
@@ -1658,7 +1653,7 @@ public class PopUpWindow {
 
 		final Window panel = new Window();
 		panel.setBodyStyle("background: none; padding: 10px");
-		panel.setHeadingText("Edit makefile");
+		panel.setHeadingText("Edit CMakeLists");
 		panel.setButtonAlign(BoxLayoutPack.CENTER);
 		panel.setWidth(800);
 		panel.setHeight(800);
@@ -1666,13 +1661,13 @@ public class PopUpWindow {
 		panel.setModal(true);
 		panel.setResizable(false);
 
-		final TextButton saveButton = new TextButton("Save");
+		final TextButton saveButton = new TextButton(COIConstants.BUTTON_SAVE);
 		final TextButton cancelButton = new TextButton(
 				COIConstants.BUTTON_CANCEL);
 
 		final AceEditor editor = new AceEditor();
-		editor.setWidth("100%");
-		editor.setHeight("100%");
+		editor.setWidth(COIConstants.SIZE_100_PERCENTAGE);
+		editor.setHeight(COIConstants.SIZE_100_PERCENTAGE);
 
 		panel.add(editor);
 
@@ -1805,18 +1800,18 @@ public class PopUpWindow {
 					@Override
 					public void onFailure(Throwable caught) {
 						GWT.log(caught.getMessage());
-						Info.display("Save error", "Error in saving makefile.");
+						Info.display("Save error", "Error in saving CMakeLists.");
 					}
 
 					@Override
 					public void onSuccess(Boolean result) {
 
 						if (result.booleanValue()) {
-							Info.display("Save makefile",
-									"Makefile was successfully updated.");
+							Info.display("Save CMakeLists",
+									"CMakeLists was successfully updated.");
 						} else {
 							Info.display("Save error",
-									"Error in saving makefile.");
+									"Error in saving CMakeLists.");
 						}
 					}
 				});
