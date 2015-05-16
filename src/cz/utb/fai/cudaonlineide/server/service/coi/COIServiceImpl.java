@@ -471,7 +471,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 		        p_stdinForPermissions.newLine();
 		        p_stdinForPermissions.flush();
 			    
-				COIServiceImpl.this.buildProject(coiWorkspace, coiProject);
+				// COIServiceImpl.this.buildProject(coiWorkspace, coiProject);
 				
 			    return "----- CREATING MAKEFILE -----" + System.lineSeparator() + sb.toString().replace("-- ", "");
 		    
