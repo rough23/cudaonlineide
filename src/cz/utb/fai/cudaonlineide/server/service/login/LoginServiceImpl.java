@@ -29,229 +29,229 @@ import cz.utb.fai.cudaonlineide.shared.dto.COIUser;
 
 /**
  * Implementation of LoginService servlet.
- * 
+ *
  * @author Belanec
  *
  */
 public class LoginServiceImpl extends RemoteServiceServlet implements
-		LoginService {
-	
-	private static final long serialVersionUID = 4456105400553118785L;
+        LoginService {
 
-	/**
-	 * Method for login user to IDE.
-	 */
-	@Override
-	public COIUser loginServer(String name, String password) {
-		
-		System.out.println("LoginServiceImpl LOG [Login request by " + name + "]");
-		
-		int randomNum = (int) (Math.random() * (Integer.MAX_VALUE - 1));
+    private static final long serialVersionUID = 4456105400553118785L;
 
-		COIUser user = new COIUser(name, String.valueOf(randomNum));
+    /**
+     * Method for login user to IDE.
+     */
+    @Override
+    public COIUser loginServer(String name, String password) {
 
-		if (this.isUserToLogByIMAP(user, password)) {
-			
-			System.out.println("LoginServiceImpl LOG [IMAP login service]");
-			
-			user.setLoggedIn(true);
-			this.createUserWorkFolder(user);
-			storeUserInSession(user);
-		} else {
+        System.out.println("LoginServiceImpl LOG [Login request by " + name + "]");
 
-			if (this.isUserToLogByUserToLogFile(user, password)) {
-				
-				System.out.println("LoginServiceImpl LOG [File login service]");
-				
-				user.setLoggedIn(true);
-				this.createUserWorkFolder(user);
-				storeUserInSession(user);
-			} else {
-				System.out.println("LoginServiceImpl LOG [User " + name + " cannot be logged in]");
-			}
-		}
+        int randomNum = (int) (Math.random() * (Integer.MAX_VALUE - 1));
 
-		return user;
-	}
+        COIUser user = new COIUser(name, String.valueOf(randomNum));
 
-	/**
-	 * Method for login from current session.
-	 */
-	@Override
-	public COIUser loginFromSessionServer() {
-		
-		System.out.println("LoginServiceImpl LOG [Login request from session]");
-		
-		return getUserAlreadyFromSession();
-	}
+        if (this.isUserToLogByIMAP(user, password)) {
 
-	/**
-	 * Method from logged out active user.
-	 */
-	@Override
-	public void logout() {
-		
-		System.out.println("LoginServiceImpl LOG [Logout request]");
-		
-		deleteUserFromSession();
-	}
+            System.out.println("LoginServiceImpl LOG [IMAP login service]");
 
-	/**
-	 * Method gets user from active session.
-	 * 
-	 * @return User object in session.
-	 */
-	private COIUser getUserAlreadyFromSession() {
-		COIUser user = null;
-		HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-		HttpSession session = httpServletRequest.getSession();
-		Object userObj = session.getAttribute(COIConstants.CUF_USER);
-		if (userObj != null && userObj instanceof COIUser) {
-			user = (COIUser) userObj;
-		}
-		return user;
-	}
+            user.setLoggedIn(true);
+            this.createUserWorkFolder(user);
+            storeUserInSession(user);
+        } else {
 
-	/**
-	 * Method store user to session.
-	 * 
-	 * @param user User object to store.
-	 */
-	private void storeUserInSession(COIUser user) {
-		HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-		HttpSession session = httpServletRequest.getSession(true);
-		session.setAttribute(COIConstants.CUF_USER, user);
-	}
+            if (this.isUserToLogByUserToLogFile(user, password)) {
 
-	/**
-	 * Method delete user from session.
-	 */
-	private void deleteUserFromSession() {
-		HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-		HttpSession session = httpServletRequest.getSession();
-		session.removeAttribute(COIConstants.CUF_USER);
-	}
+                System.out.println("LoginServiceImpl LOG [File login service]");
 
-	/**
-	 * Method tests if user is able to login by IMAP authentication.
-	 * 
-	 * @param userToLog User object to login.
-	 * @param userPassword User password.
-	 * @return True if user is able to login.
-	 */
-	private boolean isUserToLogByIMAP(COIUser userToLog, String userPassword) {
+                user.setLoggedIn(true);
+                this.createUserWorkFolder(user);
+                storeUserInSession(user);
+            } else {
+                System.out.println("LoginServiceImpl LOG [User " + name + " cannot be logged in]");
+            }
+        }
 
-		ImapAuthentication imapAuthentication = new ImapAuthentication();
-		return imapAuthentication
-				.isUserToLog(userToLog.getName(), userPassword);
-	}
+        return user;
+    }
 
-	/**
-	 * Method test if user is able to login by login file.
-	 * 
-	 * @param userToLog User object to login.
-	 * @param userPassword User password.
-	 * @return True if user is able to login.
-	 */
-	private boolean isUserToLogByUserToLogFile(COIUser userToLog,
-			String userPassword) {
+    /**
+     * Method for login from current session.
+     */
+    @Override
+    public COIUser loginFromSessionServer() {
 
-		try {
-			File fXmlFile = new File(WorkspaceConstants.CUDA_WORK_FOLDER
-					+ WorkspaceConstants.USER_TO_LOG_FILE);
+        System.out.println("LoginServiceImpl LOG [Login request from session]");
 
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        return getUserAlreadyFromSession();
+    }
 
-			Document doc = dBuilder.parse(fXmlFile);
+    /**
+     * Method from logged out active user.
+     */
+    @Override
+    public void logout() {
 
-			doc.getDocumentElement().normalize();
+        System.out.println("LoginServiceImpl LOG [Logout request]");
 
-			if (!doc.getDocumentElement().getNodeName()
-					.equals(COIConstants.CUF_USERS)) {
-				return false;
-			}
+        deleteUserFromSession();
+    }
 
-			NodeList nUsers = doc.getElementsByTagName(COIConstants.CUF_USER);
+    /**
+     * Method gets user from active session.
+     *
+     * @return User object in session.
+     */
+    private COIUser getUserAlreadyFromSession() {
+        COIUser user = null;
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession();
+        Object userObj = session.getAttribute(COIConstants.CUF_USER);
+        if (userObj != null && userObj instanceof COIUser) {
+            user = (COIUser) userObj;
+        }
+        return user;
+    }
 
-			if (nUsers == null || nUsers.getLength() == 0) {
-				return false;
-			}
+    /**
+     * Method store user to session.
+     *
+     * @param user User object to store.
+     */
+    private void storeUserInSession(COIUser user) {
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession(true);
+        session.setAttribute(COIConstants.CUF_USER, user);
+    }
 
-			for (int i = 0; i < nUsers.getLength(); i++) {
+    /**
+     * Method delete user from session.
+     */
+    private void deleteUserFromSession() {
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession();
+        session.removeAttribute(COIConstants.CUF_USER);
+    }
 
-				Node nUser = nUsers.item(i);
+    /**
+     * Method tests if user is able to login by IMAP authentication.
+     *
+     * @param userToLog User object to login.
+     * @param userPassword User password.
+     * @return True if user is able to login.
+     */
+    private boolean isUserToLogByIMAP(COIUser userToLog, String userPassword) {
 
-				if (nUser.getNodeName().equals(COIConstants.CUF_USER)
-						&& nUser.getNodeType() == Node.ELEMENT_NODE) {
+        ImapAuthentication imapAuthentication = new ImapAuthentication();
+        return imapAuthentication
+                .isUserToLog(userToLog.getName(), userPassword);
+    }
 
-					Element eUser = (Element) nUser;
+    /**
+     * Method test if user is able to login by login file.
+     *
+     * @param userToLog User object to login.
+     * @param userPassword User password.
+     * @return True if user is able to login.
+     */
+    private boolean isUserToLogByUserToLogFile(COIUser userToLog,
+            String userPassword) {
 
-					if (eUser.getAttribute(COIConstants.CUF_NAME) == null
-							|| eUser.getAttribute(COIConstants.CUF_PASSWORD) == null) {
-						continue;
-					}
+        try {
+            File fXmlFile = new File(WorkspaceConstants.CUDA_WORK_FOLDER
+                    + WorkspaceConstants.USER_TO_LOG_FILE);
 
-					String password = "";
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory
+                    .newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-					try {
+            Document doc = dBuilder.parse(fXmlFile);
 
-						MessageDigest mDigest = MessageDigest
-								.getInstance("SHA1");
-						byte[] result = mDigest.digest(userPassword.getBytes());
+            doc.getDocumentElement().normalize();
 
-						StringBuffer sb = new StringBuffer();
-						for (int q = 0; q < result.length; q++) {
-							sb.append(Integer.toString(
-									(result[q] & 0xff) + 0x100, 16)
-									.substring(1));
-						}
+            if (!doc.getDocumentElement().getNodeName()
+                    .equals(COIConstants.CUF_USERS)) {
+                return false;
+            }
 
-						password = sb.toString();
+            NodeList nUsers = doc.getElementsByTagName(COIConstants.CUF_USER);
 
-					} catch (NoSuchAlgorithmException e) {
-						Logger.getLogger(LoginServiceImpl.class.getName()).log(
-								Level.SEVERE, null, e);
-					}
+            if (nUsers == null || nUsers.getLength() == 0) {
+                return false;
+            }
 
-					if (userToLog.getName().equals(
-							eUser.getAttribute(COIConstants.CUF_NAME))
-							&& password.equals(eUser
-									.getAttribute(COIConstants.CUF_PASSWORD))) {
-						return true;
-					}
-				}
-			}
+            for (int i = 0; i < nUsers.getLength(); i++) {
 
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			Logger.getLogger(LoginServiceImpl.class.getName()).log(
-					Level.SEVERE, null, e);
-			return false;
-		}
+                Node nUser = nUsers.item(i);
 
-		return false;
-	}
+                if (nUser.getNodeName().equals(COIConstants.CUF_USER)
+                        && nUser.getNodeType() == Node.ELEMENT_NODE) {
 
-	/**
-	 * Method create work folder for login user.
-	 * 
-	 * @param user Login user object.
-	 */
-	private void createUserWorkFolder(COIUser user) {
+                    Element eUser = (Element) nUser;
 
-		File userWorkFolder = new File(WorkspaceConstants.CUDA_WORK_FOLDER
-				+ user.getName());
+                    if (eUser.getAttribute(COIConstants.CUF_NAME) == null
+                            || eUser.getAttribute(COIConstants.CUF_PASSWORD) == null) {
+                        continue;
+                    }
 
-		if (userWorkFolder.exists()) {
-			if (userWorkFolder.isDirectory()) {
-				return;
-			} else {
-				userWorkFolder.delete();
-				userWorkFolder.mkdir();
-			}
-		} else {
-			userWorkFolder.mkdir();
-		}
-	}
+                    String password = "";
+
+                    try {
+
+                        MessageDigest mDigest = MessageDigest
+                                .getInstance("SHA1");
+                        byte[] result = mDigest.digest(userPassword.getBytes());
+
+                        StringBuffer sb = new StringBuffer();
+                        for (int q = 0; q < result.length; q++) {
+                            sb.append(Integer.toString(
+                                    (result[q] & 0xff) + 0x100, 16)
+                                    .substring(1));
+                        }
+
+                        password = sb.toString();
+
+                    } catch (NoSuchAlgorithmException e) {
+                        Logger.getLogger(LoginServiceImpl.class.getName()).log(
+                                Level.SEVERE, null, e);
+                    }
+
+                    if (userToLog.getName().equals(
+                            eUser.getAttribute(COIConstants.CUF_NAME))
+                            && password.equals(eUser
+                                    .getAttribute(COIConstants.CUF_PASSWORD))) {
+                        return true;
+                    }
+                }
+            }
+
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            Logger.getLogger(LoginServiceImpl.class.getName()).log(
+                    Level.SEVERE, null, e);
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Method create work folder for login user.
+     *
+     * @param user Login user object.
+     */
+    private void createUserWorkFolder(COIUser user) {
+
+        File userWorkFolder = new File(WorkspaceConstants.CUDA_WORK_FOLDER
+                + user.getName());
+
+        if (userWorkFolder.exists()) {
+            if (userWorkFolder.isDirectory()) {
+                return;
+            } else {
+                userWorkFolder.delete();
+                userWorkFolder.mkdir();
+            }
+        } else {
+            userWorkFolder.mkdir();
+        }
+    }
 }

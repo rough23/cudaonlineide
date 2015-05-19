@@ -20,6 +20,7 @@ public class COIConfiguration implements Serializable {
 	private String type;
 	private COICompiler compiler;
 	private COILinker linker;
+	private COIGlobal global;
 	
 	/**
 	 * Default constructor.
@@ -28,6 +29,7 @@ public class COIConfiguration implements Serializable {
 		type = COIConstants.EMPTY;
 		compiler = new COICompiler();
 		linker = new COILinker();
+		global = new COIGlobal();
 	}
 	
 	/**
@@ -39,6 +41,7 @@ public class COIConfiguration implements Serializable {
 		
 		compiler = new COICompiler();
 		linker = new COILinker();
+		global = new COIGlobal();
 		
 		if(typeOfConfiguration.equals(COIConstants.BUILD_CONFIGURATION_DEBUG)) {
 			type = COIConstants.BUILD_CONFIGURATION_DEBUG;
@@ -52,6 +55,9 @@ public class COIConfiguration implements Serializable {
 		} else {
 			type = COIConstants.BUILD_CONFIGURATION_CUSTOM;
 		}
+		
+		global.setCcPtx("3.5");
+		global.setCcGpu("3.5");
 	}
 	
 	public String getType() {
@@ -71,5 +77,11 @@ public class COIConfiguration implements Serializable {
 	}
 	public void setLinker(COILinker linker) {
 		this.linker = linker;
+	}
+	public COIGlobal getGlobal() {
+		return global;
+	}
+	public void setGlobal(COIGlobal global) {
+		this.global = global;
 	}
 }

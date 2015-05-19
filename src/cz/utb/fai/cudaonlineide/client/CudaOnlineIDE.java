@@ -324,7 +324,11 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         MenuItem editorItem7 = new MenuItem(COIConstants.MENU_SET_TAB_SIZE, MenuToolbarIcons.PROVIDER.menuTabSize());
         MenuItem editorItem8 = new MenuItem(COIConstants.MENU_GO_TO_LINE, MenuToolbarIcons.PROVIDER.menuGoToLine());
         MenuItem editorItem9 = new MenuItem(COIConstants.MENU_INSERT_AT_LINE, MenuToolbarIcons.PROVIDER.menuInsert());
-
+        MenuItem editorItem10 = new MenuItem(COIConstants.MENU_OPEN_EXTENDED_VIEW);
+        MenuItem editorItem11 = new MenuItem(COIConstants.MENU_ECLIPSE_THEME);
+        MenuItem editorItem12 = new MenuItem(COIConstants.MENU_NIGHT_THEME);
+        MenuItem editorItem13 = new MenuItem(COIConstants.MENU_XCODE_THEME);
+        
         Menu editorMenu = new Menu();
         editorMenu.addSelectionHandler(this.getCOIMenuSelectionHandler());
         editorMenu.add(editorItem1);
@@ -337,6 +341,12 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         editorMenu.add(editorItem7);
         editorMenu.add(editorItem8);
         editorMenu.add(editorItem9);
+        editorMenu.add(new SeparatorMenuItem());
+        editorMenu.add(editorItem10);
+        editorMenu.add(new SeparatorMenuItem());
+        editorMenu.add(editorItem11);
+        editorMenu.add(editorItem12);
+        editorMenu.add(editorItem13);
 
         // BUILDING PROJECT MENU
         MenuItem projectItem1 = new MenuItem(COIConstants.MENU_SET_ACTIVE_PROJECT, MenuToolbarIcons.PROVIDER.projectActive());
@@ -601,6 +611,14 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
                         CudaOnlineIDE.this.editorGoToLineMenuToolbar();
                     } else if (item.getText().equals(COIConstants.MENU_INSERT_AT_LINE)) {
                         CudaOnlineIDE.this.editorInserTextMenuToolbar();
+                    } else if (item.getText().equals(COIConstants.MENU_OPEN_EXTENDED_VIEW)) {
+                        CudaOnlineIDE.this.editorOpenExtendedViewMenuToolbar();
+                    } else if (item.getText().equals(COIConstants.MENU_ECLIPSE_THEME)) {
+                        CudaOnlineIDE.this.editorEclipseThemeMenuToolbar();
+                    } else if (item.getText().equals(COIConstants.MENU_NIGHT_THEME)) {
+                        CudaOnlineIDE.this.editorNightThemeMenuToolbar();
+                    } else if (item.getText().equals(COIConstants.MENU_XCODE_THEME)) {
+                        CudaOnlineIDE.this.editorXcodeThemeMenuToolbar();
                     } else if (item.getText().equals(COIConstants.MENU_HELP)) {
                         CudaOnlineIDE.this.helpMenuToolbar();
                     } else if (item.getText().equals(COIConstants.MENU_CUDA_PROGRAMMING_GUIDE)) {
@@ -624,7 +642,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 
         ToolBar toolBar = new ToolBar();
 
-		  // WORKSPACE TOOLBAR GROUP
+        // WORKSPACE TOOLBAR GROUP
         TextButton workspaceNew = new TextButton();
         workspaceNew.setIcon(MenuToolbarIcons.PROVIDER.menuNew());
         workspaceNew.setToolTip(COIConstants.MENU_NEW_WORKSPACE);
@@ -715,7 +733,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         workspaceGroup.setHeadingText(COIConstants.MENUTOOLBAR_WORKSPACE);
         workspaceGroup.add(tableWorkspace);
 
-	      // PROJECT TOOLBAR GROUP
+        // PROJECT TOOLBAR GROUP
         TextButton projectProperties = new TextButton();
         projectProperties.setIcon(MenuToolbarIcons.PROVIDER.menuProperties());
         projectProperties.setToolTip(COIConstants.MENU_PROPERTIES);
@@ -756,7 +774,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         projectGroup.setHeadingText(COIConstants.MENUTOOLBAR_PROJECT);
         projectGroup.add(tableProject);
 
-	      // FILE TOOLBAR GROUP
+        // FILE TOOLBAR GROUP
         TextButton fileClose = new TextButton();
         fileClose.setIcon(MenuToolbarIcons.PROVIDER.menuClose());
         fileClose.setToolTip(COIConstants.MENU_CLOSE_FILE);
@@ -791,7 +809,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         fileGroup.setHeadingText(COIConstants.MENUTOOLBAR_FILE);
         fileGroup.add(tableFile);
 
-	      // BUILD TOOLBAR GROUP
+        // BUILD TOOLBAR GROUP
         TextButton buildCmakeLists = new TextButton();
         buildCmakeLists.setIcon(MenuToolbarIcons.PROVIDER.menuCmakeLists());
         buildCmakeLists.setToolTip(COIConstants.MENU_GENERATE_CMAKELISTS + " as executable");
@@ -858,7 +876,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         buildGroup.setHeadingText(COIConstants.MENUTOOLBAR_BUILD);
         buildGroup.add(tableBuild);
 
-	      // USER TOOLBAR GROUP
+        // USER TOOLBAR GROUP
         TextButton userLogout = new TextButton();
         userLogout.setIcon(MenuToolbarIcons.PROVIDER.menuLogout());
         userLogout.setToolTip(COIConstants.MENU_LOGOUT);
@@ -945,7 +963,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         configurationGroup.setHeadingText(COIConstants.MENUTOOLBAR_CONFIGURATION);
         configurationGroup.add(tableConfguration);
 
-	      // EDITOR TOOLBAR GROUP
+        // EDITOR TOOLBAR GROUP
         TextButton editorSettabsize = new TextButton();
         editorSettabsize.setIcon(MenuToolbarIcons.PROVIDER.menuTabSize());
         editorSettabsize.setToolTip(COIConstants.MENU_SET_TAB_SIZE);
@@ -994,7 +1012,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
         editorGroup.setHeadingText(COIConstants.MENUTOOLBAR_EDITOR);
         editorGroup.add(tableEditor);
 
-	      // ADD GROUPS TO TOOLBAR
+        // ADD GROUPS TO TOOLBAR
         toolBar.add(workspaceGroup);
         toolBar.add(projectGroup);
         toolBar.add(fileGroup);
@@ -2289,6 +2307,90 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
     }
 
     /**
+     * Method opens extended view of code editor.
+     */
+    private void editorOpenExtendedViewMenuToolbar() {
+
+        if (CudaOnlineIDE.fileTabPanel.getActiveWidget() == null) {
+            return;
+        }
+
+        Info.display("Extended view open", "To close extended view press Esc or Ctrl-Shift-I.");
+
+        CudaOnlineIDE.northContainerOpen = false;
+        
+        for (int i = 0; i < CudaOnlineIDE.fileTabPanel.getWidgetCount(); i++) {
+            Widget widget = CudaOnlineIDE.fileTabPanel.getWidget(i);
+            TabItemConfig tiConfig = CudaOnlineIDE.fileTabPanel.getConfig(widget);
+            tiConfig.setClosable(false);
+            CudaOnlineIDE.fileTabPanel.update(widget, tiConfig);
+        }
+
+        CudaOnlineIDE.coiAppContainer.hide(LayoutRegion.NORTH);
+        CudaOnlineIDE.coiAppContainer.hide(LayoutRegion.WEST);
+        CudaOnlineIDE.coiAppContainer.hide(LayoutRegion.EAST);
+        CudaOnlineIDE.coiAppContainer.hide(LayoutRegion.SOUTH);
+    }
+    
+    /**
+     * Method sets eclipse theme in code editor.
+     */
+    private void editorEclipseThemeMenuToolbar() {
+
+    	Info.display("Theme change", "Eclipse theme was chosen.");
+    	
+    	CudaOnlineIDE.aceActualTheme = AceEditorTheme.ECLIPSE;
+    	
+        if (CudaOnlineIDE.fileTabPanel.getActiveWidget() == null) {
+            return;
+        }
+
+        for (int i = 0; i < CudaOnlineIDE.fileTabPanel.getWidgetCount(); i++) {
+            AceEditor aceEditor = (AceEditor) CudaOnlineIDE.fileTabPanel.getWidget(i);
+            aceEditor.setTheme(AceEditorTheme.ECLIPSE);
+        }
+    }
+    
+    /**
+     * Method sets night theme in code editor.
+     */
+    private void editorNightThemeMenuToolbar() {
+    	
+    	Info.display("Theme change", "Night theme was chosen.");
+
+        CudaOnlineIDE.aceActualTheme = AceEditorTheme.TWILIGHT;
+
+        if (CudaOnlineIDE.fileTabPanel.getActiveWidget() == null) {
+            return;
+        }
+        
+        for (int i = 0; i < CudaOnlineIDE.fileTabPanel.getWidgetCount(); i++) {
+            AceEditor aceEditor = (AceEditor) CudaOnlineIDE.fileTabPanel.getWidget(i);
+            aceEditor.setTheme(AceEditorTheme.TWILIGHT);
+        }
+    }
+    
+    /**
+     * Method sets xcode theme in code editor.
+     */
+    private void editorXcodeThemeMenuToolbar() {
+
+        Info.display("Theme change", "XCode theme was chosen.");
+
+        CudaOnlineIDE.aceActualTheme = AceEditorTheme.XCODE;
+
+        if (CudaOnlineIDE.fileTabPanel.getActiveWidget() == null) {
+            return;
+        }
+
+        for (int i = 0; i < CudaOnlineIDE.fileTabPanel.getWidgetCount(); i++) {
+            AceEditor aceEditor = (AceEditor) CudaOnlineIDE.fileTabPanel.getWidget(i);
+            aceEditor.setTheme(AceEditorTheme.XCODE);
+        }
+    }
+    
+    
+    /**
      * Method logging out logged user.
      */
     private void logoutUser() {
@@ -2843,9 +2945,15 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
                      */
                     @Override
                     public Object exec(AceEditor editor) {
+                    	
+                    	if(!CudaOnlineIDE.northContainerOpen) {
+                    		return null;
+                    	}
+                    	
+                        Info.display("Extended view open", "To close extended view press Esc or Ctrl-Shift-I.");
 
-                        Info.display("Extended view open", "To close extended view press Ctrl-Shift-I.");
-
+                        CudaOnlineIDE.northContainerOpen = false;
+                        
                         for (int i = 0; i < CudaOnlineIDE.fileTabPanel.getWidgetCount(); i++) {
                             Widget widget = CudaOnlineIDE.fileTabPanel.getWidget(i);
                             TabItemConfig tiConfig = CudaOnlineIDE.fileTabPanel.getConfig(widget);
@@ -2870,8 +2978,14 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
                     @Override
                     public Object exec(AceEditor editor) {
 
+                    	if(CudaOnlineIDE.northContainerOpen) {
+                    		return null;
+                    	}
+                    	
                         Info.display("Extended view close", "To open extended view press Ctrl-I.");
 
+                        CudaOnlineIDE.northContainerOpen = true;
+                        
                         for (int i = 0; i < CudaOnlineIDE.fileTabPanel.getWidgetCount(); i++) {
                             Widget widget = CudaOnlineIDE.fileTabPanel.getWidget(i);
                             TabItemConfig tiConfig = CudaOnlineIDE.fileTabPanel.getConfig(widget);
@@ -2895,7 +3009,7 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
 
                         return null;
                     }
-                }).withBindKey("Ctrl-Shift-I"));
+                }).withBindKey("Ctrl-Shift-I|Esc"));
 
         editor.addCommand(new AceCommandDescription("saveActualFile",
                 new AceCommandDescription.ExecAction() {
@@ -2909,10 +3023,15 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
                         return null;
                     }
                 }).withBindKey("Ctrl-S"));
-
+        
         CudaOnlineIDE.getTagsFromFileToEastPanel(coiFile.getPath());
     }
 
+    /**
+     * Method builds context menu for workspace structure.
+     * 
+     * @param event Event called before show context menu.
+     */
     private static void buildContextMenu(BeforeShowContextMenuEvent event) {
 
         COIData coiData = CudaOnlineIDE.coiDataTree.getSelectionModel().getSelectedItem();
@@ -3098,17 +3217,17 @@ public class CudaOnlineIDE implements IsWidget, EntryPoint {
      * @param elementID Id of object to control CCP events.
      */
     private static native void addCCPHandler(Element elementID) /*-{
-     elementID.oncut = function(e) {     	
-     @cz.utb.fai.cudaonlineide.client.CudaOnlineIDE::handleCut()();
-     };
+     	elementID.oncut = function(e) {     	
+     		@cz.utb.fai.cudaonlineide.client.CudaOnlineIDE::handleCut()();
+     	};
 	      
-     elementID.oncopy = function(e) {      	
-     @cz.utb.fai.cudaonlineide.client.CudaOnlineIDE::handleCopy()();
-     };
+     	elementID.oncopy = function(e) {      	
+     		@cz.utb.fai.cudaonlineide.client.CudaOnlineIDE::handleCopy()();
+     	};
 	      
-     elementID.onpaste = function(e) {
-     @cz.utb.fai.cudaonlineide.client.CudaOnlineIDE::handlePaste()();
-     };
+     	elementID.onpaste = function(e) {
+     		@cz.utb.fai.cudaonlineide.client.CudaOnlineIDE::handlePaste()();
+     	};
      }-*/;
 
     /**

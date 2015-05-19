@@ -12,9 +12,11 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -36,6 +38,7 @@ import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
 import com.sencha.gxt.widget.core.client.form.FormPanel;
+import com.sencha.gxt.widget.core.client.form.Radio;
 import com.sencha.gxt.widget.core.client.form.SimpleComboBox;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.form.TextField;
@@ -54,6 +57,7 @@ import cz.utb.fai.cudaonlineide.shared.dto.COIProject;
 import cz.utb.fai.cudaonlineide.shared.dto.COIWorkspace;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COICompiler;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COIConfiguration;
+import cz.utb.fai.cudaonlineide.shared.dto.project.COIGlobal;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COILinker;
 import edu.ycp.cs.dh.acegwt.client.ace.AceCommandDescription;
 import edu.ycp.cs.dh.acegwt.client.ace.AceEditor;
@@ -116,17 +120,25 @@ public class PopUpWindow {
         fileName.setAllowBlank(false);
         fileName.setEmptyText("Enter file name...");
 
-        final TextField extension = new TextField();
-        extension.setAllowBlank(false);
-        extension.setEmptyText("Enter file extension...");
-
+        final SimpleComboBox<String> extension = new SimpleComboBox<String>(
+                new StringLabelProvider<String>());
+        extension.setTriggerAction(TriggerAction.ALL);
+        extension.setEditable(false);
+        extension.setWidth(100);
+        extension.add("c");
+        extension.add("cpp");
+        extension.add("h");
+        extension.add("cu");
+        extension.add("cuh");
+        extension.add("res");
+        extension.add("txt");
+        extension.setValue("cu");
+        
         fileName.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 if (fileName.getValue() != null
-                        && !fileName.getValue().isEmpty()
-                        && extension.getValue() != null
-                        && !extension.getValue().isEmpty()) {
+                        && !fileName.getValue().isEmpty()) {
                     createButton.setEnabled(true);
                 } else {
                     createButton.setEnabled(false);
@@ -138,9 +150,7 @@ public class PopUpWindow {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 if (fileName.getValue() != null
-                        && !fileName.getValue().isEmpty()
-                        && extension.getValue() != null
-                        && !extension.getValue().isEmpty()) {
+                        && !fileName.getValue().isEmpty()) {
                     createButton.setEnabled(true);
                 } else {
                     createButton.setEnabled(false);
@@ -635,6 +645,12 @@ public class PopUpWindow {
 
         form.addSubmitHandler(new SubmitHandler() {
             public void onSubmit(SubmitEvent event) {
+            	
+            	if(file.getValue() == null || file.getValue().isEmpty()) {
+            		Info.display("Upload error", "Choose some file, please.");
+                    event.cancel();
+            	}
+
                 if (fileName.getValue() == null
                         || fileName.getValue().isEmpty()) {
                     Info.display("Upload error", "File name must not be empty.");
@@ -866,7 +882,8 @@ public class PopUpWindow {
         final TextButton compilerButton = new TextButton(
                 COIConstants.BUTTON_EDIT);
         final TextButton linkerButton = new TextButton(COIConstants.BUTTON_EDIT);
-
+        final TextButton globalButton = new TextButton(COIConstants.BUTTON_EDIT);
+        
         final COIConfiguration configurationToEdit;
 
         switch (CudaOnlineIDE.buildConfigurationCombo.getValue()) {
@@ -898,6 +915,7 @@ public class PopUpWindow {
                 .setValue(configurationToEdit.getLinker().getOptionsText());
         linkerOptions.setEnabled(false);
 
+        
         compilerButton.addSelectHandler(new SelectHandler() {
             @Override
             public void onSelect(SelectEvent event) {
@@ -931,6 +949,16 @@ public class PopUpWindow {
                 });
             }
         });
+        
+        globalButton.addSelectHandler(new SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+
+                Window globalPanel = PopUpWindow.globalPanel(coiProject,
+                        configurationToEdit);
+                globalPanel.show();
+            }
+        });
 
         okButton.addSelectHandler(new SelectHandler() {
             @Override
@@ -946,6 +974,8 @@ public class PopUpWindow {
         p.add(new FieldLabel(linkerOptions, "Linker options"),
                 new VerticalLayoutData(1, -1));
         p.add(new FieldLabel(linkerButton, "Linker settings"),
+                new VerticalLayoutData(1, -1));
+        p.add(new FieldLabel(globalButton, "Global settings"),
                 new VerticalLayoutData(1, -1));
         panel.addButton(okButton);
 
@@ -1281,15 +1311,15 @@ public class PopUpWindow {
                 new VerticalLayoutData(1, -1));
         optionsVLC.add(compilerWfatal_errors, new VerticalLayoutData(1, -1));
         optionsVLC.add(compilerpedantic_errors, new VerticalLayoutData(1, -1));
-        optionsVLC.add(new FieldLabel(compilerOther, "Other options:"),
+        optionsVLC.add(new FieldLabel(compilerOther, "Other options"),
                 new VerticalLayoutData(1, -1));
 
         includeDirectoriesVLC.add(new FieldLabel(
-                compilerIncludeDirectoriesText, "Include directories:"),
+                compilerIncludeDirectoriesText, "Include directories"),
                 new VerticalLayoutData(1, -1));
 
         preprocessorsVLC.add(new FieldLabel(compilerPreprocessorsText,
-                "Preprocessors:"), new VerticalLayoutData(1, -1));
+                "Preprocessors"), new VerticalLayoutData(1, -1));
 
         panel.addButton(saveButton);
         panel.addButton(cancelButton);
@@ -1463,14 +1493,145 @@ public class PopUpWindow {
 
         optionsVLC.add(linkers, new VerticalLayoutData(1, -1));
         optionsVLC.add(linkerfopenmp, new VerticalLayoutData(1, -1));
-        optionsVLC.add(new FieldLabel(linkerOther, "Other options:"),
+        optionsVLC.add(new FieldLabel(linkerOther, "Other options"),
                 new VerticalLayoutData(1, -1));
 
         libraryPathsVLC.add(new FieldLabel(linkerLibraryPathsText,
-                "Library paths:"), new VerticalLayoutData(1, -1));
+                "Library paths"), new VerticalLayoutData(1, -1));
 
         libraryNamesVLC.add(new FieldLabel(linkerLibraryNamesText,
-                "Library names:"), new VerticalLayoutData(1, -1));
+                "Library names"), new VerticalLayoutData(1, -1));
+
+        panel.addButton(saveButton);
+        panel.addButton(cancelButton);
+
+        return panel;
+    }
+    
+    /**
+     * Pop up window for active project global settings.
+     *
+     * @param coiProject Active project.
+     * @param coiConfiguration Active configuration.
+     * @return Global options panel.
+     */
+    public static Window globalPanel(final COIProject coiProject,
+            final COIConfiguration coiConfiguration) {
+
+        final Window panel = new Window();
+        panel.setBodyStyle("background: none; padding: 10px");
+        panel.setHeadingText("Global settings");
+        panel.setButtonAlign(BoxLayoutPack.CENTER);
+        panel.setWidth(500);
+        panel.setLayoutData(new MarginData(10));
+        panel.setModal(true);
+        panel.setResizable(true);
+        panel.setMaximizable(true);
+        panel.setDraggable(true);
+
+        VerticalLayoutContainer ccVLC = new VerticalLayoutContainer();
+        FieldSet ccFieldSet = new FieldSet();
+        ccFieldSet.setHeadingText("Compute capability");
+        ccFieldSet.setCollapsible(true);
+        ccFieldSet.add(ccVLC);
+        ccFieldSet.getElement().getStyle().setMarginBottom(10, Unit.PX);
+
+        VerticalLayoutContainer argumentsVLC = new VerticalLayoutContainer();
+        FieldSet arguementsFieldSet = new FieldSet();
+        arguementsFieldSet.setHeadingText("Arguments");
+        arguementsFieldSet.setCollapsible(true);
+        arguementsFieldSet.add(argumentsVLC);
+
+        VerticalLayoutContainer globalVLC = new VerticalLayoutContainer();
+        globalVLC.add(ccFieldSet, new VerticalLayoutData(1, -1));
+        globalVLC.add(arguementsFieldSet, new VerticalLayoutData(1, -1));
+
+        panel.add(globalVLC);
+
+        final COIGlobal coiGlobal = coiConfiguration.getGlobal();
+
+        final TextButton saveButton = new TextButton(COIConstants.BUTTON_SAVE);
+        final TextButton cancelButton = new TextButton(
+                COIConstants.BUTTON_CANCEL);
+
+        Radio ccPtx35 = new Radio();
+        ccPtx35.setBoxLabel("3.5");
+        ccPtx35.setValue(true);
+     
+        ToggleGroup ccPtx = new ToggleGroup();
+        ccPtx.add(ccPtx35);
+        
+        HorizontalPanel ccPtxHP = new HorizontalPanel();
+        ccPtxHP.add(ccPtx35);
+        
+        Radio ccGpu35 = new Radio();
+        ccGpu35.setBoxLabel("3.5");
+        ccGpu35.setValue(true);
+        
+        ToggleGroup ccGpu = new ToggleGroup();
+        ccGpu.add(ccGpu35);
+        
+        HorizontalPanel ccGpuHP = new HorizontalPanel();
+        ccGpuHP.add(ccGpu35);
+        
+        final TextField arguments = new TextField();
+        arguments.setValue(coiGlobal.getArguments());
+
+        saveButton.addSelectHandler(new SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+
+            	coiGlobal.setCcPtx("3.5");
+            	coiGlobal.setCcGpu("3.5");
+                coiGlobal.setArguments(arguments.getValue());
+
+                COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
+
+                for (COIProject coiProjectTmp : coiWorkspace.getItems()) {
+                    if (coiProjectTmp.getPath() == coiProject.getPath()) {
+                        coiProjectTmp.setBuildConfiguration(coiProject
+                                .getBuildConfiguration());
+                        break;
+                    }
+                }
+
+                CudaOnlineIDE.coiService.updateWorkspace(coiWorkspace,
+                        new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log(caught.getMessage());
+                                Info.display("Update error",
+                                        "Error in updating project.");
+                            }
+
+                            @Override
+                            public void onSuccess(Void voidResult) {
+                                CudaOnlineIDE
+                                .updateBuildConfigurationComboBoxByActiveProject();
+                                Info.display("Update",
+                                        "Project global properties was successfully updated.");
+                            }
+                        });
+
+                panel.hide();
+            }
+        });
+
+        cancelButton.addSelectHandler(new SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                panel.hide();
+            }
+        });
+
+        ccVLC.add(new FieldLabel(ccPtxHP, "PTX code"),
+                new VerticalLayoutData(1, -1));
+        ccVLC.add(new FieldLabel(ccGpuHP, "GPU code"),
+                new VerticalLayoutData(1, -1));
+
+        argumentsVLC.add(new FieldLabel(arguments,
+                "Arguments"), new VerticalLayoutData(1, -1));
 
         panel.addButton(saveButton);
         panel.addButton(cancelButton);
@@ -1765,7 +1926,7 @@ public class PopUpWindow {
                 + "</tr>"
                 + "<tr>"
                 + "<td style=\"font-weight: bold;\">License:</td>"
-                + "<td><a href=\"https://www.gnu.org/licenses/gpl-2.0.html\" target=\"_blank\">GNU/GPL v2</a></td>"
+                + "<td><a href=\"http://www.gnu.org/copyleft/gpl.html\" target=\"_blank\">GNU/GPL v3</a></td>"
                 + "</tr>"
                 + "<tr>"
                 + "<td style=\"font-weight: bold;\">Address:</td>"

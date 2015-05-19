@@ -52,6 +52,7 @@ import cz.utb.fai.cudaonlineide.shared.dto.COIFileData;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COIBuildConfiguration;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COICompiler;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COIConfiguration;
+import cz.utb.fai.cudaonlineide.shared.dto.project.COIGlobal;
 import cz.utb.fai.cudaonlineide.shared.dto.project.COILinker;
 
 import com.google.gson.Gson;
@@ -469,7 +470,8 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
                 p_stdinForPermissions.newLine();
                 p_stdinForPermissions.flush();
 
-                // COIServiceImpl.this.buildProject(coiWorkspace, coiProject);
+                //COIServiceImpl.this.buildProject(coiWorkspace, coiProject);
+
                 return "----- CREATING MAKEFILE -----" + System.lineSeparator() + sb.toString().replace("-- ", "");
 
             } catch (IOException e2) {
@@ -557,6 +559,9 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
                     coiConfiguration = new COIConfiguration();
             }
 
+            String ccPtx = coiConfiguration.getGlobal().getCcPtx();
+            String ccGpu = coiConfiguration.getGlobal().getCcGpu();
+            
             FileWriter fw = new FileWriter(cMakeLists.getAbsoluteFile());
 
             Path buildPath = Paths.get(buildFolder.getPath());
@@ -574,7 +579,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
             bw.write("find_package(CUDA QUIET REQUIRED)" + System.lineSeparator() + System.lineSeparator());
 
             // NVCC OPTIONS
-            bw.write("set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_35,code=sm_35)" + System.lineSeparator() + System.lineSeparator());
+            bw.write("set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_" + ccPtx.replace(".", "") + ",code=sm_" + ccGpu.replace(".", "") + ")" + System.lineSeparator() + System.lineSeparator());
 
             // INCLUDE DIRECTORIES
             bw.write("include_directories(" + System.lineSeparator());
@@ -1178,10 +1183,30 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
      */
     private String runProjectRemote(final COIProject coiProject) {
 
+    	COIConfiguration coiConfiguration;
+
+        switch (coiProject.getBuildConfiguration().getActive()) {
+            case COIConstants.BUILD_CONFIGURATION_DEBUG:
+                coiConfiguration = coiProject.getBuildConfiguration().getDebug();
+                break;
+
+            case COIConstants.BUILD_CONFIGURATION_RELEASE:
+                coiConfiguration = coiProject.getBuildConfiguration().getRelease();
+                break;
+
+            case COIConstants.BUILD_CONFIGURATION_CUSTOM:
+                coiConfiguration = coiProject.getBuildConfiguration().getCustom();
+                break;
+            default:
+                coiConfiguration = new COIConfiguration();
+        }
+    	
+        String arguments = coiConfiguration.getGlobal().getArguments();
+        
         BuildServer bs = new BuildServer();
 
         try {
-            bs.execute(coiProject.getUuid(), "");
+            bs.execute(coiProject.getUuid(), arguments);
         } catch (IOException e) {
             Logger.getLogger(COIServiceImpl.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -1965,6 +1990,9 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
 
         Element linker = doc.createElement(COIConstants.CWS_LINKER);
         type.appendChild(linker);
+        
+        Element global = doc.createElement(COIConstants.CWS_GLOBAL);
+        type.appendChild(global);
 
         Element compilerOptions = doc.createElement(COIConstants.CWS_OPTIONS);
         compiler.appendChild(compilerOptions);
@@ -2001,13 +2029,25 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
             default:
                 coiConfiguration = new COIConfiguration();
         }
-
+        
         this.setOptionListFromBuildConfiguration(doc, compilerOptions, coiConfiguration.getCompiler().getOptions());
         this.setOptionListFromBuildConfiguration(doc, compilerIncludeDirectories, coiConfiguration.getCompiler().getIncludeDirectories());
         this.setOptionListFromBuildConfiguration(doc, compilerPreprocessors, coiConfiguration.getCompiler().getPreprocessors());
         this.setOptionListFromBuildConfiguration(doc, linkerOptions, coiConfiguration.getLinker().getOptions());
         this.setOptionListFromBuildConfiguration(doc, linkerLibraryPaths, coiConfiguration.getLinker().getLibraryPaths());
         this.setOptionListFromBuildConfiguration(doc, linkerLibraryNames, coiConfiguration.getLinker().getLibraryNames());
+        
+        Element dPtx = doc.createElement(COIConstants.CWS_PTX);
+        global.appendChild(dPtx);
+        dPtx.setAttribute(COIConstants.CWS_VALUE, coiConfiguration.getGlobal().getCcPtx());
+        
+        Element dGpu = doc.createElement(COIConstants.CWS_GPU);
+        global.appendChild(dGpu);
+        dGpu.setAttribute(COIConstants.CWS_VALUE, coiConfiguration.getGlobal().getCcGpu());
+        
+        Element dArgument = doc.createElement(COIConstants.CWS_ARGUMENT);
+        global.appendChild(dArgument);
+        dArgument.setAttribute(COIConstants.CWS_VALUE, coiConfiguration.getGlobal().getArguments());
     }
 
     /**
@@ -2097,6 +2137,64 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
                 }
 
                 coiConfiguration.setLinker(coiLinker);
+                
+                COIGlobal coiGlobal = new COIGlobal();
+
+                NodeList nGlobals = eType.getElementsByTagName(COIConstants.CWS_GLOBAL);
+
+                for (int l = 0; l < nGlobals.getLength(); l++) {
+
+                    Node nGlobal = nGlobals.item(l);
+
+                    if (nGlobal.getNodeName().equals(COIConstants.CWS_GLOBAL) && nGlobal.getNodeType() == Node.ELEMENT_NODE) {
+
+                        Element eGlobal = (Element) nGlobal;
+
+                        NodeList nPtxs = eGlobal.getElementsByTagName(COIConstants.CWS_PTX);
+
+                        for (int n = 0; n < nPtxs.getLength(); n++) {
+
+                            Node nPtx = nPtxs.item(n);
+
+                            if (nPtx.getNodeName().equals(COIConstants.CWS_PTX) && nPtx.getNodeType() == Node.ELEMENT_NODE) {
+
+                                Element ePtx = (Element) nPtx;
+
+                                coiGlobal.setCcPtx(ePtx.getAttribute(COIConstants.CWS_VALUE));
+                            }
+                        }
+                        
+                        NodeList nGpus = eGlobal.getElementsByTagName(COIConstants.CWS_GPU);
+
+                        for (int n = 0; n < nGpus.getLength(); n++) {
+
+                            Node nGpu = nGpus.item(n);
+
+                            if (nGpu.getNodeName().equals(COIConstants.CWS_GPU) && nGpu.getNodeType() == Node.ELEMENT_NODE) {
+
+                                Element eGpu = (Element) nGpu;
+
+                                coiGlobal.setCcGpu(eGpu.getAttribute(COIConstants.CWS_VALUE));
+                            }
+                        }
+                        
+                        NodeList nArguments = eGlobal.getElementsByTagName(COIConstants.CWS_ARGUMENT);
+
+                        for (int n = 0; n < nArguments.getLength(); n++) {
+
+                            Node nArgument = nArguments.item(n);
+
+                            if (nArgument.getNodeName().equals(COIConstants.CWS_ARGUMENT) && nArgument.getNodeType() == Node.ELEMENT_NODE) {
+
+                                Element eArgument = (Element) nArgument;
+
+                                coiGlobal.setArguments(eArgument.getAttribute(COIConstants.CWS_VALUE));
+                            }
+                        }
+                    }
+                }
+
+                coiConfiguration.setGlobal(coiGlobal);
             }
         }
 

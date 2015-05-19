@@ -1,4 +1,4 @@
 # Module cudaonlineide
 # RPC service class, partial path of RPC policy file
 cz.utb.fai.cudaonlineide.client.service.login.LoginService, FB6581EA2784A3A28027CD59EE375578.gwt.rpc
-cz.utb.fai.cudaonlineide.client.service.coi.COIService, 9C401DEB6DB9AFF8AD3065A60F2F7839.gwt.rpc
+cz.utb.fai.cudaonlineide.client.service.coi.COIService, A103144F9EE2F5A707A32312028897B4.gwt.rpc

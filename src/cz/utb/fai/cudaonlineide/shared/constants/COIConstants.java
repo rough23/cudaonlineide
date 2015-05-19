@@ -45,6 +45,10 @@ public class COIConstants {
 	public static final String MENU_SET_TAB_SIZE = "Set tab size";
 	public static final String MENU_GO_TO_LINE = "Go to line";
 	public static final String MENU_INSERT_AT_LINE = "Insert at line";
+	public static final String MENU_OPEN_EXTENDED_VIEW = "Open extended view";
+	public static final String MENU_ECLIPSE_THEME = "Eclipse theme";
+	public static final String MENU_NIGHT_THEME = "Night theme";
+	public static final String MENU_XCODE_THEME = "Xcode theme";
 	public static final String MENU_SERVER_LOGS = "Server logs";
 	public static final String MENU_CONNECTION_LOGS = "Connection logs";
 	public static final String MENU_LOGOUT = "Logout";
@@ -95,6 +99,10 @@ public class COIConstants {
 	public static final String CWS_LIBRARY_NAMES = "library_names";
 	public static final String CWS_COMPILER = "compiler";
 	public static final String CWS_LINKER = "linker";
+	public static final String CWS_GLOBAL = "global";
+	public static final String CWS_PTX = "ptx";
+	public static final String CWS_GPU = "gpu";
+	public static final String CWS_ARGUMENT = "argument";
 	public static final String CWS_VALUE = "value";
 	public static final String CWS_NAME = "name";
 	public static final String CWS_PATH = "path";

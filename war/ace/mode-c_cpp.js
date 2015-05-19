@@ -60,13 +60,16 @@ var c_cppHighlightRules = function() {
     var storageType = (
         "asm|__asm__|auto|bool|_Bool|char|_Complex|double|enum|float|" +
         "_Imaginary|int|long|short|signed|struct|typedef|union|unsigned|void|" +
-        "class|wchar_t|template"
+        "class|wchar_t|template|dim3|size_t|char1|char2|char3|char4|short1|" +
+        "short2|short3|short4|int1|int2|int3|int4|long1|long2|long3|long4|" + 
+        "float1|float2|float3|float4|uchar1|uchar2|uchar3|uchar4|ushort1|" + 
+        "ushort2|ushort3|ushort4|uint1|uint2|uint3|uint4|ulong1|ulong2|ulong3|ulong4" 
     );
 
     var storageModifiers = (
         "const|extern|register|restrict|static|volatile|inline|private|" +
         "protected|public|friend|explicit|virtual|export|mutable|typename|" +
-        "constexpr|new|delete"
+        "constexpr|new|delete|__global__|__device__|__host__|__shared__|__constant__"
     );
 
     var keywordOperators = (
@@ -84,7 +87,9 @@ var c_cppHighlightRules = function() {
         "storage.modifier" : storageModifiers,
         "keyword.operator" : keywordOperators,
         "variable.language": "this",
-        "constant.language": builtinConstants
+        "constant.language": builtinConstants,
+        "cuda.function" : "cudaMalloc|cudaMemset|cudaFree|cudeMemcpy|cudaMemcpyHostToDevice|cudaMemcpyDeviceToHost|cudaMemcpyDeviceToDevice|gridDim|" +
+        "blockDim|blockIdx|threadIdx|cudaDeviceSynchronize|cudaGetLastError|cudaDeviceReset|x|y|z|w"
     }, "identifier");
 
     var identifierRe = "[a-zA-Z\\$_\u00a1-\uffff][a-zA-Z\d\\$_\u00a1-\uffff]*\\b";
