@@ -17,6 +17,9 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import cz.utb.fai.cudaonlineide.client.CudaOnlineIDE;
 import cz.utb.fai.cudaonlineide.client.dto.COIData;
 import cz.utb.fai.cudaonlineide.client.popup.PopUpWindow;
+import cz.utb.fai.cudaonlineide.client.predefinedfiles.PredefinedCFile;
+import cz.utb.fai.cudaonlineide.client.predefinedfiles.PredefinedCppFile;
+import cz.utb.fai.cudaonlineide.client.predefinedfiles.PredefinedCuFile;
 import cz.utb.fai.cudaonlineide.client.utils.MenuToolbarIcons;
 import cz.utb.fai.cudaonlineide.shared.constants.COIConstants;
 import cz.utb.fai.cudaonlineide.shared.dto.COIEnum;
@@ -67,8 +70,41 @@ public class TreeContextMenu {
 
                             if (popUpData.containsKey(PopUpWindow.FILENAME)
                                     && popUpData
-                                    .containsKey(PopUpWindow.EXTENSION)) {
+                                    .containsKey(PopUpWindow.EXTENSION) && popUpData
+                                    .containsKey(PopUpWindow.PREDEFINED)) {
 
+                            	String predefinedText;
+                            	
+                            	if((Boolean) popUpData.get(PopUpWindow.PREDEFINED)) {
+                            		switch ((String) popUpData.get(PopUpWindow.EXTENSION)) {
+                            			case COIConstants.EXTENSION_C:
+                            				predefinedText = PredefinedCFile.getCMain((String) popUpData.get(PopUpWindow.FILENAME));
+                            				break;
+                            			case COIConstants.EXTENSION_CPP:
+                            				predefinedText = PredefinedCppFile.getCppMain((String) popUpData.get(PopUpWindow.FILENAME));
+                            				break;
+                            			case COIConstants.EXTENSION_CU:
+                            				predefinedText = PredefinedCuFile.getCuMain((String) popUpData.get(PopUpWindow.FILENAME));
+                            				break;
+                            			default:
+                            				predefinedText = COIConstants.EMPTY;
+                            		}
+                            	} else {
+                            		switch ((String) popUpData.get(PopUpWindow.EXTENSION)) {
+	                        			case COIConstants.EXTENSION_C:
+	                        				predefinedText = PredefinedCFile.getCBlank((String) popUpData.get(PopUpWindow.FILENAME));
+	                        				break;
+	                        			case COIConstants.EXTENSION_CPP:
+	                        				predefinedText = PredefinedCppFile.getCppBlank((String) popUpData.get(PopUpWindow.FILENAME));
+	                        				break;
+	                        			case COIConstants.EXTENSION_CU:
+	                        				predefinedText = PredefinedCuFile.getCuBlank((String) popUpData.get(PopUpWindow.FILENAME));
+	                        				break;
+	                        			default:
+	                        				predefinedText = COIConstants.EMPTY;
+                            		}
+                            	}
+                            	
                                 final COIFile coiFile = new COIFile();
                                 coiFile.setName((String) popUpData
                                         .get(PopUpWindow.FILENAME));
@@ -78,7 +114,7 @@ public class TreeContextMenu {
                                         + coiFile.getName()
                                         + COIConstants.COMMA
                                         + coiFile.getExtension());
-                                coiFile.setText(COIConstants.EMPTY);
+                                coiFile.setText(predefinedText);
                                 coiFile.setTypeOfCOI(COIEnum.FILE);
 
                                 COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;

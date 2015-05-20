@@ -50,7 +50,7 @@ public class DownloadZipService extends HttpServlet {
         System.out.println("DownloadZipService LOG [Downloading folder " + folderPath + "]");
 
         try {
-            String zipName = folderName + COIConstants.ZIP_EXTENSION;
+            String zipName = folderName + COIConstants.EXTENSION_COMMA_ZIP;
             String zipPath = WorkspaceConstants.CUDA_WORK_FOLDER + activeUser + COIConstants.FWD_SLASH + zipName;
 
             File projectToZip = new File(folderPath);

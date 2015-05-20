@@ -900,7 +900,7 @@ public class COIServiceImpl extends RemoteServiceServlet implements COIService {
     private String[] buildProjectRemote(COIWorkspace coiWorkspace, final COIProject coiProject) {
 
         try {
-            String zipName = coiProject.getName() + COIConstants.ZIP_EXTENSION;
+            String zipName = coiProject.getName() + COIConstants.EXTENSION_COMMA_ZIP;
             String zipPath = coiWorkspace.getPath() + zipName;
 
             File projectToZip = new File(coiProject.getPath());

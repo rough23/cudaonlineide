@@ -2,6 +2,7 @@ cz.utb.fai.cudaonlineide.client
 cz.utb.fai.cudaonlineide.client.context
 cz.utb.fai.cudaonlineide.client.dto
 cz.utb.fai.cudaonlineide.client.popup
+cz.utb.fai.cudaonlineide.client.predefinedfiles
 cz.utb.fai.cudaonlineide.client.service.coi
 cz.utb.fai.cudaonlineide.client.service.login
 cz.utb.fai.cudaonlineide.client.utils

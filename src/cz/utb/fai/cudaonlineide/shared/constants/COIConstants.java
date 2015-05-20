@@ -127,7 +127,14 @@ public class COIConstants {
 	public static final int GENERATING_ALL = 1;
 	public static final int GENERATING_WITH_QUESTION = 2;
 	
-	public static final String ZIP_EXTENSION = ".zip";
+	public static final String EXTENSION_C = "c";
+	public static final String EXTENSION_CPP = "cpp";
+	public static final String EXTENSION_H = "h";
+	public static final String EXTENSION_CU = "cu";
+	public static final String EXTENSION_CUH = "cuh";
+	public static final String EXTENSION_TXT = "txt";
+	public static final String EXTENSION_RES = "res";
+	public static final String EXTENSION_COMMA_ZIP = ".zip";
 
 	public static final String SIZE_100_PERCENTAGE = "100%";
 	

@@ -75,6 +75,7 @@ public class PopUpWindow {
 
     public static final String FILENAME = "filename";
     public static final String EXTENSION = "extension";
+    public static final String PREDEFINED = "predefined";
     public static final String FOLDERNAME = "foldername";
     public static final String PROJECTNAME = "projectname";
     public static final String WORKSPACENAME = "workspacename";
@@ -125,14 +126,18 @@ public class PopUpWindow {
         extension.setTriggerAction(TriggerAction.ALL);
         extension.setEditable(false);
         extension.setWidth(100);
-        extension.add("c");
-        extension.add("cpp");
-        extension.add("h");
-        extension.add("cu");
-        extension.add("cuh");
-        extension.add("res");
-        extension.add("txt");
-        extension.setValue("cu");
+        extension.add(COIConstants.EXTENSION_C);
+        extension.add(COIConstants.EXTENSION_CPP);
+        extension.add(COIConstants.EXTENSION_H);
+        extension.add(COIConstants.EXTENSION_CU);
+        extension.add(COIConstants.EXTENSION_CUH);
+        extension.add(COIConstants.EXTENSION_RES);
+        extension.add(COIConstants.EXTENSION_TXT);
+        extension.setValue(COIConstants.EXTENSION_CU);
+        
+        final CheckBox includeMain = new CheckBox();
+        includeMain.setValue(false);
+        includeMain.setEnabled(true);
         
         fileName.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -143,18 +148,29 @@ public class PopUpWindow {
                 } else {
                     createButton.setEnabled(false);
                 }
+                
+                panel.focus();
             }
         });
 
         extension.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
+            	
+            	if(extension.getValue().equals(COIConstants.EXTENSION_C) || extension.getValue().equals(COIConstants.EXTENSION_CPP) || extension.getValue().equals(COIConstants.EXTENSION_CU)) {
+            		includeMain.setEnabled(true);
+            	} else {
+            		includeMain.setEnabled(false);
+            	}
+            	
                 if (fileName.getValue() != null
                         && !fileName.getValue().isEmpty()) {
                     createButton.setEnabled(true);
                 } else {
                     createButton.setEnabled(false);
                 }
+
+                panel.focus();
             }
         });
 
@@ -181,6 +197,8 @@ public class PopUpWindow {
                             fileName.getValue());
                     PopUpWindow.data.put(PopUpWindow.EXTENSION,
                             extension.getValue());
+                    PopUpWindow.data.put(PopUpWindow.PREDEFINED,
+                            includeMain.getValue());
                 }
 
                 panel.hide();
@@ -197,6 +215,8 @@ public class PopUpWindow {
         p.add(new FieldLabel(fileName, "File name"), new VerticalLayoutData(1,
                 -1));
         p.add(new FieldLabel(extension, "File extension"),
+                new VerticalLayoutData(1, -1));
+        p.add(new FieldLabel(includeMain, "Include main()"),
                 new VerticalLayoutData(1, -1));
         panel.addButton(createButton);
         panel.addButton(cancelButton);
