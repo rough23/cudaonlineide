@@ -52,13 +52,10 @@ public class TreeContextMenu {
 
             @Override
             public void onSelection(SelectionEvent<Item> event) {
-                final COIData coiData = CudaOnlineIDE.coiDataTree
-                        .getSelectionModel().getSelectedItem();
-                if (coiData != null && coiData.getPath() != null
-                        && coiData.getCoiObject() != null) {
+                final COIData coiData = CudaOnlineIDE.coiDataTree.getSelectionModel().getSelectedItem();
+                if (coiData != null && coiData.getPath() != null && coiData.getCoiObject() != null) {
 
-                    Window newFilePanel = PopUpWindow
-                            .newFilePanel((COIFolder) coiData.getCoiObject());
+                    Window newFilePanel = PopUpWindow.newFilePanel((COIFolder) coiData.getCoiObject());
                     newFilePanel.show();
 
                     newFilePanel.addHideHandler(new HideHandler() {
@@ -68,10 +65,7 @@ public class TreeContextMenu {
 
                             Map<String, Object> popUpData = PopUpWindow.data;
 
-                            if (popUpData.containsKey(PopUpWindow.FILENAME)
-                                    && popUpData
-                                    .containsKey(PopUpWindow.EXTENSION) && popUpData
-                                    .containsKey(PopUpWindow.PREDEFINED)) {
+                            if (popUpData.containsKey(PopUpWindow.FILENAME) && popUpData.containsKey(PopUpWindow.EXTENSION) && popUpData.containsKey(PopUpWindow.PREDEFINED)) {
 
                             	String predefinedText;
                             	
@@ -106,14 +100,9 @@ public class TreeContextMenu {
                             	}
                             	
                                 final COIFile coiFile = new COIFile();
-                                coiFile.setName((String) popUpData
-                                        .get(PopUpWindow.FILENAME));
-                                coiFile.setExtension((String) popUpData
-                                        .get(PopUpWindow.EXTENSION));
-                                coiFile.setPath(coiData.getPath()
-                                        + coiFile.getName()
-                                        + COIConstants.COMMA
-                                        + coiFile.getExtension());
+                                coiFile.setName((String) popUpData.get(PopUpWindow.FILENAME));
+                                coiFile.setExtension((String) popUpData.get(PopUpWindow.EXTENSION));
+                                coiFile.setPath(coiData.getPath() + coiFile.getName() + COIConstants.COMMA + coiFile.getExtension());
                                 coiFile.setText(predefinedText);
                                 coiFile.setTypeOfCOI(COIEnum.FILE);
 
@@ -121,12 +110,9 @@ public class TreeContextMenu {
 
                                 boolean escapeFor = false;
 
-                                for (COIProject coiProject : coiWorkspace
-                                        .getItems()) {
-                                    for (COIFolder coiFolder : coiProject
-                                            .getItems()) {
-                                        if (coiFolder.getPath() == coiData
-                                                .getPath()) {
+                                for (COIProject coiProject : coiWorkspace.getItems()) {
+                                    for (COIFolder coiFolder : coiProject.getItems()) {
+                                        if (coiFolder.getPath() == coiData.getPath()) {
                                             coiFolder.getItems().add(coiFile);
                                             escapeFor = true;
                                             break;
@@ -137,56 +123,32 @@ public class TreeContextMenu {
                                     }
                                 }
 
-                                CudaOnlineIDE.coiService.createNewFile(
-                                        coiWorkspace, coiFile,
-                                        new AsyncCallback<Boolean>() {
+                                CudaOnlineIDE.coiService.createNewFile(coiWorkspace, coiFile, new AsyncCallback<Boolean>() {
 
-                                            @Override
-                                            public void onFailure(
-                                                    Throwable caught) {
-                                                        GWT.log(caught.getMessage());
-                                                        Info.display("Create error",
-                                                                "Error creating new file.");
-                                                    }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log(caught.getMessage());
+                                        Info.display("Create error", "Error creating new file.");
+                                    }
 
-                                                    @Override
-                                                    public void onSuccess(Boolean result) {
+                                    @Override
+                                    public void onSuccess(Boolean result) {
 
-                                                        if (result == true) {
-                                                            COIData childCoiData = new COIData(
-                                                                    coiFile.getName()
-                                                                    + "."
-                                                                    + coiFile
-                                                                    .getExtension(),
-                                                                    coiFile.getPath(),
-                                                                    coiFile.getText(),
-                                                                    coiFile);
-                                                            CudaOnlineIDE.coiDataTreeStore
-                                                            .add(coiData,
-                                                                    childCoiData);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .setExpanded(
-                                                                    coiData,
-                                                                    true);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .setSize(
-                                                                    COIConstants.SIZE_100_PERCENTAGE,
-                                                                    COIConstants.SIZE_100_PERCENTAGE);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .focus();
-                                                            Info.display(
-                                                                    "Create",
-                                                                    "File "
-                                                                    + childCoiData
-                                                                    .getName()
-                                                                    + " was created.");
-                                                        } else {
-                                                            Info.display(
-                                                                    "Create error",
-                                                                    "Error creating new file.");
-                                                        }
-                                                    }
-                                        });
+                                        if (result == true) {
+                                            
+                                        	COIData childCoiData = new COIData(coiFile.getName() + "." + coiFile.getExtension(), coiFile.getPath(), coiFile.getText(), coiFile);
+                                            
+                                            CudaOnlineIDE.coiDataTreeStore.add(coiData, childCoiData);
+                                            CudaOnlineIDE.coiDataTree.setExpanded(coiData, true);
+                                            CudaOnlineIDE.coiDataTree.setSize(COIConstants.SIZE_100_PERCENTAGE, COIConstants.SIZE_100_PERCENTAGE);
+                                            CudaOnlineIDE.coiDataTree.focus();
+                                            
+                                            Info.display("Create", "File " + childCoiData.getName() + " was created.");
+                                        } else {
+                                            Info.display("Create error", "Error creating new file.");
+                                        }
+                                    }
+                                });
                             }
                         }
                     });
@@ -211,13 +173,10 @@ public class TreeContextMenu {
 
             @Override
             public void onSelection(SelectionEvent<Item> event) {
-                final COIData coiData = CudaOnlineIDE.coiDataTree
-                        .getSelectionModel().getSelectedItem();
-                if (coiData != null && coiData.getPath() != null
-                        && coiData.getCoiObject() != null) {
+                final COIData coiData = CudaOnlineIDE.coiDataTree.getSelectionModel().getSelectedItem();
+                if (coiData != null && coiData.getPath() != null && coiData.getCoiObject() != null) {
 
-                    Window newFolderPanel = PopUpWindow
-                            .newFolderPanel((COIProject) coiData.getCoiObject());
+                    Window newFolderPanel = PopUpWindow.newFolderPanel((COIProject) coiData.getCoiObject());
                     newFolderPanel.show();
 
                     newFolderPanel.addHideHandler(new HideHandler() {
@@ -230,70 +189,45 @@ public class TreeContextMenu {
                             if (popUpData.containsKey(PopUpWindow.FOLDERNAME)) {
 
                                 final COIFolder coiFolder = new COIFolder();
-                                coiFolder.setName((String) popUpData
-                                        .get(PopUpWindow.FOLDERNAME));
-                                coiFolder.setPath(coiData.getPath()
-                                        + coiFolder.getName()
-                                        + COIConstants.FWD_SLASH);
+                                coiFolder.setName((String) popUpData.get(PopUpWindow.FOLDERNAME));
+                                coiFolder.setPath(coiData.getPath() + coiFolder.getName() + COIConstants.FWD_SLASH);
                                 coiFolder.setTypeOfCOI(COIEnum.FOLDER);
 
                                 COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
 
-                                for (COIProject coiProject : coiWorkspace
-                                        .getItems()) {
-                                    if (coiProject.getPath() == coiData
-                                            .getPath()) {
+                                for (COIProject coiProject : coiWorkspace.getItems()) {
+                                    if (coiProject.getPath() == coiData.getPath()) {
                                         coiProject.getItems().add(coiFolder);
                                         break;
                                     }
                                 }
 
-                                CudaOnlineIDE.coiService.createNewFolder(
-                                        coiWorkspace, coiFolder,
-                                        new AsyncCallback<Boolean>() {
+                                CudaOnlineIDE.coiService.createNewFolder(coiWorkspace, coiFolder, new AsyncCallback<Boolean>() {
 
-                                            @Override
-                                            public void onFailure(
-                                                    Throwable caught) {
-                                                        GWT.log(caught.getMessage());
-                                                        Info.display("Create error",
-                                                                "Error creating new folder.");
-                                                    }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log(caught.getMessage());
+                                        Info.display("Create error", "Error creating new folder.");
+                                    }
 
-                                                    @Override
-                                                    public void onSuccess(Boolean result) {
+                                    @Override
+                                    public void onSuccess(Boolean result) {
 
-                                                        if (result == true) {
-                                                            COIData childCoiData = new COIData(
-                                                                    coiFolder.getName(),
-                                                                    coiFolder.getPath(),
-                                                                    null, coiFolder);
-                                                            CudaOnlineIDE.coiDataTreeStore
-                                                            .add(coiData,
-                                                                    childCoiData);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .setExpanded(
-                                                                    coiData,
-                                                                    true);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .setSize(
-                                                                    COIConstants.SIZE_100_PERCENTAGE,
-                                                                    COIConstants.SIZE_100_PERCENTAGE);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .focus();
-                                                            Info.display(
-                                                                    "Create",
-                                                                    "Folder "
-                                                                    + childCoiData
-                                                                    .getName()
-                                                                    + " was created.");
-                                                        } else {
-                                                            Info.display(
-                                                                    "Create error",
-                                                                    "Error creating new folder.");
-                                                        }
-                                                    }
-                                        });
+                                        if (result == true) {
+                                            
+                                        	COIData childCoiData = new COIData(coiFolder.getName(), coiFolder.getPath(), null, coiFolder);
+                                            
+                                            CudaOnlineIDE.coiDataTreeStore.add(coiData, childCoiData);
+                                            CudaOnlineIDE.coiDataTree.setExpanded(coiData, true);
+                                            CudaOnlineIDE.coiDataTree.setSize(COIConstants.SIZE_100_PERCENTAGE, COIConstants.SIZE_100_PERCENTAGE);
+                                            CudaOnlineIDE.coiDataTree.focus();
+                                            
+                                            Info.display("Create", "Folder " + childCoiData.getName() + " was created.");
+                                        } else {
+                                            Info.display( "Create error", "Error creating new folder.");
+                                        }
+                                    }
+                                });
                             }
                         }
                     });
@@ -318,14 +252,11 @@ public class TreeContextMenu {
 
             @Override
             public void onSelection(SelectionEvent<Item> event) {
-                final COIData coiData = CudaOnlineIDE.coiDataTree
-                        .getSelectionModel().getSelectedItem();
-                if (coiData != null && coiData.getPath() != null
-                        && coiData.getCoiObject() != null) {
+                final COIData coiData = CudaOnlineIDE.coiDataTree.getSelectionModel().getSelectedItem();
+                
+                if (coiData != null && coiData.getPath() != null && coiData.getCoiObject() != null) {
 
-                    Window newProjectPanel = PopUpWindow
-                            .newProjectPanel((COIWorkspace) coiData
-                                    .getCoiObject());
+                    Window newProjectPanel = PopUpWindow.newProjectPanel((COIWorkspace) coiData.getCoiObject());
                     newProjectPanel.show();
 
                     newProjectPanel.addHideHandler(new HideHandler() {
@@ -333,75 +264,49 @@ public class TreeContextMenu {
                         @Override
                         public void onHide(HideEvent event) {
 
-                            Map<String, Object> popUpData = PopUpWindow.data;
+                            final Map<String, Object> popUpData = PopUpWindow.data;
 
-                            if (popUpData.containsKey(PopUpWindow.PROJECTNAME)
-                                    && popUpData
-                                    .containsKey(PopUpWindow.BUILD_CONFIGURATION)) {
+                            if (popUpData.containsKey(PopUpWindow.PROJECTNAME) && popUpData.containsKey(PopUpWindow.BUILD_CONFIGURATION) && popUpData.containsKey(PopUpWindow.SAMPLE_PROJECT)) {
 
                                 final COIProject coiProject = new COIProject();
-                                coiProject.setName((String) popUpData
-                                        .get(PopUpWindow.PROJECTNAME));
-                                coiProject.setPath(coiData.getPath()
-                                        + coiProject.getName()
-                                        + COIConstants.FWD_SLASH);
-                                coiProject
-                                        .setBuildConfiguration(new COIBuildConfiguration(
-                                                        (String) popUpData
-                                                        .get(PopUpWindow.BUILD_CONFIGURATION)));
+                                coiProject.setName((String) popUpData.get(PopUpWindow.PROJECTNAME));
+                                coiProject.setPath(coiData.getPath() + coiProject.getName() + COIConstants.FWD_SLASH);
+                                coiProject.setBuildConfiguration(new COIBuildConfiguration((String) popUpData.get(PopUpWindow.BUILD_CONFIGURATION)));
                                 coiProject.setTypeOfCOI(COIEnum.PROJECT);
 
                                 COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
                                 coiWorkspace.getItems().add(coiProject);
 
-                                CudaOnlineIDE.coiService.createNewProject(
-                                        coiWorkspace, coiProject,
-                                        new AsyncCallback<Boolean>() {
+                                CudaOnlineIDE.coiService.createNewProject(coiWorkspace, coiProject, new AsyncCallback<Boolean>() {
 
-                                            @Override
-                                            public void onFailure(
-                                                    Throwable caught) {
-                                                        GWT.log(caught.getMessage());
-                                                        Info.display("Create error",
-                                                                "Error creating new project.");
-                                                    }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log(caught.getMessage());
+                                        Info.display("Create error", "Error creating new project.");
+                                    }
 
-                                                    @Override
-                                                    public void onSuccess(Boolean result) {
+                                    @Override
+                                    public void onSuccess(Boolean result) {
 
-                                                        if (result == true) {
-                                                            COIData childCoiData = new COIData(
-                                                                    coiProject
-                                                                    .getName(),
-                                                                    coiProject
-                                                                    .getPath(),
-                                                                    null, coiProject);
-                                                            CudaOnlineIDE.coiDataTreeStore
-                                                            .add(coiData,
-                                                                    childCoiData);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .setExpanded(
-                                                                    coiData,
-                                                                    true);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .setSize(
-                                                                    COIConstants.SIZE_100_PERCENTAGE,
-                                                                    COIConstants.SIZE_100_PERCENTAGE);
-                                                            CudaOnlineIDE.coiDataTree
-                                                            .focus();
-                                                            Info.display(
-                                                                    "Create",
-                                                                    "Project "
-                                                                    + childCoiData
-                                                                    .getName()
-                                                                    + " was created.");
-                                                        } else {
-                                                            Info.display(
-                                                                    "Create error",
-                                                                    "Error creating new project.");
-                                                        }
-                                                    }
-                                        });
+                                        if (result == true) {
+                                            
+                                        	COIData childCoiData = new COIData(coiProject.getName(), coiProject.getPath(), null, coiProject);
+                                            
+                                            CudaOnlineIDE.coiDataTreeStore.add(coiData, childCoiData);
+                                            CudaOnlineIDE.coiDataTree.setExpanded(coiData, true);
+                                            CudaOnlineIDE.coiDataTree.setSize(COIConstants.SIZE_100_PERCENTAGE, COIConstants.SIZE_100_PERCENTAGE);
+                                            CudaOnlineIDE.coiDataTree.focus();
+                                            
+                                            if((Boolean) popUpData.get(PopUpWindow.SAMPLE_PROJECT)) {
+                                            	TreeContextMenu.createFolderOfSampleProject(coiProject, childCoiData);
+                                            } else {
+                                            	Info.display("Create","Project " + childCoiData.getName() + " was created.");
+                                            }
+                                        } else {
+                                        	Info.display("Create error", "Error creating new project.");
+                                        }
+                                    }
+                                });
                             }
                         }
                     });
@@ -1163,5 +1068,117 @@ public class TreeContextMenu {
 
         return build;
     }
+    
+    /**
+     * Method creates folder of sample project and provides call to create sample source file.
+     * 
+     * @param sampleProject Sample project.
+     * @param coiData Item from project explorer tree.
+     */
+    private static void createFolderOfSampleProject(final COIProject sampleProject, final COIData coiData) {
+    	
+    	final COIFolder coiFolder = new COIFolder();
+        coiFolder.setName("src");
+        coiFolder.setPath(sampleProject.getPath() + coiFolder.getName() + COIConstants.FWD_SLASH);
+        coiFolder.setTypeOfCOI(COIEnum.FOLDER);
 
+        COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
+
+        for (COIProject coiProject : coiWorkspace.getItems()) {
+            if (coiProject.getPath() == sampleProject.getPath()) {
+                coiProject.getItems().add(coiFolder);
+                break;
+            }
+        }
+
+        CudaOnlineIDE.coiService.createNewFolder(coiWorkspace, coiFolder, new AsyncCallback<Boolean>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage());
+                Info.display("Create error", "Error creating new project.");
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+                if (result == true) {
+                    
+                	COIData childCoiData = new COIData(coiFolder.getName(), coiFolder.getPath(), null, coiFolder);
+                    
+                    CudaOnlineIDE.coiDataTreeStore.add(coiData, childCoiData);
+                    CudaOnlineIDE.coiDataTree.setExpanded(coiData, true);
+                    CudaOnlineIDE.coiDataTree.setSize(COIConstants.SIZE_100_PERCENTAGE, COIConstants.SIZE_100_PERCENTAGE);
+                    CudaOnlineIDE.coiDataTree.focus();
+                    
+                    TreeContextMenu.createFileOfSampleProject(sampleProject, coiFolder, childCoiData);
+                    
+                } else {
+                	Info.display("Create error", "Error creating new project.");                
+            	}
+            }
+        });
+    }
+    
+    /**
+     * Method creates source file of sample project.
+     * 
+     * @param sampleProject Sample project.
+     * @param sampleFolder Folder of project.
+     * @param coiData Item from project explorer tree.
+     */
+    private static void createFileOfSampleProject(final COIProject sampleProject, final COIFolder sampleFolder, final COIData coiData) {
+    	
+    	final COIFile coiFile = new COIFile();
+        coiFile.setName("main");
+        coiFile.setExtension(COIConstants.EXTENSION_CU);
+        coiFile.setPath(sampleFolder.getPath() + coiFile.getName() + COIConstants.COMMA + coiFile.getExtension());
+        coiFile.setText(PredefinedCuFile.getCuSample(coiFile.getName()));
+        coiFile.setTypeOfCOI(COIEnum.FILE);
+
+        COIWorkspace coiWorkspace = CudaOnlineIDE.ACTIVE_CUDA_COI_WORKSPACE;
+
+        boolean escapeFor = false;
+
+        for (COIProject coiProject : coiWorkspace.getItems()) {
+            for (COIFolder coiFolder : coiProject.getItems()) {
+                if (coiFolder.getPath() == sampleFolder.getPath()) {
+                    coiFolder.getItems().add(coiFile);
+                    escapeFor = true;
+                    break;
+                }
+            }
+            if (escapeFor) {
+                break;
+            }
+        }
+
+        CudaOnlineIDE.coiService.createNewFile(coiWorkspace, coiFile, new AsyncCallback<Boolean>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage());
+                Info.display("Create error", "Error creating new project.");
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+                if (result == true) {
+                    
+                	COIData childCoiData = new COIData(coiFile.getName() + "." + coiFile.getExtension(), coiFile.getPath(), coiFile.getText(), coiFile);
+                    
+                    CudaOnlineIDE.coiDataTreeStore.add(coiData, childCoiData);
+                    CudaOnlineIDE.coiDataTree.setExpanded(coiData, true);
+                    CudaOnlineIDE.coiDataTree.setSize(COIConstants.SIZE_100_PERCENTAGE, COIConstants.SIZE_100_PERCENTAGE);
+                    CudaOnlineIDE.coiDataTree.focus();
+                    
+                    Info.display("Create","Sample project " + sampleProject.getName() + " was created.");
+                } else {
+                	Info.display("Create error", "Error creating new project.");      
+                }
+            }
+        });
+    	
+    }
 }

@@ -82,6 +82,7 @@ public class PopUpWindow {
     public static final String WORKSPACEFILE = "workspacefile";
     public static final String BUILD_CONFIGURATION = "buildconfiguration";
     public static final String BUILD_CONFIGURATION_OBJECT = "buildconfigurationobject";
+    public static final String SAMPLE_PROJECT = "sampleproject";
     public static final String COIFOLDER = "coifolder";
     public static final String COIPROJECT = "coiproject";
     public static final String COIWORKSPACE = "coiworkspace";
@@ -354,7 +355,10 @@ public class PopUpWindow {
         buildConfiguration.add(COIConstants.BUILD_CONFIGURATION_DEBUG);
         buildConfiguration.add(COIConstants.BUILD_CONFIGURATION_RELEASE);
         buildConfiguration.setValue(COIConstants.BUILD_CONFIGURATION_DEBUG);
-
+        
+        final CheckBox createSampleProject = new CheckBox();
+        createSampleProject.setValue(false);
+        
         projectName.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -388,6 +392,8 @@ public class PopUpWindow {
                             projectName.getValue());
                     PopUpWindow.data.put(PopUpWindow.BUILD_CONFIGURATION,
                             buildConfiguration.getValue());
+                    PopUpWindow.data.put(PopUpWindow.SAMPLE_PROJECT,
+                    		createSampleProject.getValue());
                 }
 
                 panel.hide();
@@ -404,6 +410,8 @@ public class PopUpWindow {
         p.add(new FieldLabel(projectName, "Project name"),
                 new VerticalLayoutData(1, -1));
         p.add(new FieldLabel(buildConfiguration, "Build configuration"),
+                new VerticalLayoutData(1, -1));
+        p.add(new FieldLabel(createSampleProject, "Create sample project"),
                 new VerticalLayoutData(1, -1));
         panel.addButton(createButton);
         panel.addButton(cancelButton);
